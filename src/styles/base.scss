@@ -1,0 +1,162 @@
+// Colors
+
+$light: white;
+$dark: #f5f5f5;
+
+// TODO 87%, 60%, and 38% are used alot -- is there a way to do a "text opacity" class or something? (difference between light/dark)
+$text-black-high-emphasis: rgba(0, 0, 0, 0.87);
+$text-black-medium-emphasis: rgba(0, 0, 0, 0.6);
+$text-black-disabled: rgba(0, 0, 0, 0.38);
+
+// TODO Add light text with different colors
+
+$primary: #2d3142;
+$primary-50: #d2d7e8;
+$primary-100: #d2d7e8;
+$primary-200: #b7bcd1;
+$primary-300: #9ca1bb;
+$primary-400: #878da9;
+$primary-500: #727998;
+$primary-600: #636b87;
+$primary-700: #515870;
+$primary-800: #41455a;
+$primary-900: #2d3142;
+
+$secondary: #ff564f;
+$secondary-50: #ffecef;
+$secondary-100: #ffcfd3;
+$secondary-200: #fa9d9b;
+$secondary-300: #f37674;
+$secondary-400: #ff564f;
+$secondary-500: #ff4531;
+$secondary-600: #f63b32;
+$secondary-700: #e4302c;
+$secondary-800: #d72825;
+$secondary-900: #c81c18;
+
+// Typography
+
+// TODO Find a better way to do this
+
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6,
+.body-1,
+.body-2,
+.subtitle-1,
+.subtitle-2,
+.button,
+.caption,
+.overline {
+  font-family: Rubik;
+}
+
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6,
+.button {
+  color: $text-black-high-emphasis;
+}
+
+.body-1,
+.body-2,
+.subtitle-1,
+.subtitle-2,
+.caption,
+.overline {
+  color: $text-black-medium-emphasis;
+}
+
+%h1 {
+  font-size: 97.54px;
+  font-weight: 300;
+  letter-spacing: -1.5px;
+  line-height: 115px;
+}
+
+%h2 {
+  font-size: 60.96px;
+  font-weight: 300;
+  letter-spacing: -0.5px;
+  line-height: 72px;
+}
+
+%h3 {
+  font-size: 48.77px;
+  line-height: 58px;
+}
+
+%h4 {
+  font-size: 34.54px;
+  letter-spacing: 0.25px;
+  line-height: 41px;
+}
+
+%h5 {
+  font-size: 24.38px;
+  line-height: 29px;
+}
+
+%h6 {
+  font-size: 20.32px;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+  line-height: 24px;
+}
+
+%body-1 {
+  font-size: 16.26px;
+  letter-spacing: 0.5px;
+  line-height: 28px;
+}
+
+%body-2 {
+  font-size: 14.22px;
+  letter-spacing: 0.25px;
+  line-height: 20px;
+}
+
+%subtitle-1 {
+  font-size: 16.26px;
+  letter-spacing: 0.15px;
+  line-height: 24px;
+}
+
+%subtitle-2 {
+  font-size: 14.22px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  line-height: 24px;
+}
+
+%button {
+  font-size: 14.22px;
+  font-weight: 500;
+  letter-spacing: 1.25px;
+  line-height: 16px;
+}
+
+%caption {
+  font-size: 12.19px;
+  letter-spacing: 0.4px;
+  line-height: 16px;
+}
+
+%overline {
+  font-size: 12.19px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  line-height: 16px;
+}
+
+// Transitions (from https://material.io/design/motion/speed.html#easing)
+
+$easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+$easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
+$easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
