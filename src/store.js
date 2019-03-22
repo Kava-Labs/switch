@@ -1,27 +1,38 @@
-export default {
-  sourceAssetCode: null,
-  destinationAssetCode: null,
+import { btc, xrp, eth } from '@kava-labs/crypto-rate-utils'
+import { BehaviorSubject } from 'rxjs'
+import BigNumber from 'bignumber.js'
+
+const state = {
   uplinks: [
     {
-      connector: 'kava',
-      assetCode: 'XRP',
-      balance: 3.28982,
+      balance$: new BehaviorSubject(new BigNumber(3.2898287387)),
+      outgoingCapacity$: new BehaviorSubject(new BigNumber(5.3)),
+      incomingCapacity$: new BehaviorSubject(new BigNumber(29.45)),
       canDeposit: true,
-      canWithdraw: true
+      canWithdraw: true,
+      exchangeUnit: xrp
     },
     {
-      connector: 'kava',
-      assetCode: 'ETH',
-      balance: 0.01348,
+      balance$: new BehaviorSubject(new BigNumber(0.01348)),
+      outgoingCapacity$: new BehaviorSubject(new BigNumber(0.2398209)),
+      incomingCapacity$: new BehaviorSubject(new BigNumber(0.03)),
       canDeposit: true,
-      canWithdraw: true
+      canWithdraw: true,
+      exchangeUnit: eth
     },
     {
-      connector: 'kava',
-      assetCode: 'BTC',
-      balance: 0.00481398,
+      balance$: new BehaviorSubject(new BigNumber(0.00481398)),
+      outgoingCapacity$: new BehaviorSubject(new BigNumber(0.67237)),
+      incomingCapacity$: new BehaviorSubject(new BigNumber(Infinity)),
       canDeposit: false,
-      canWithdraw: false
+      canWithdraw: false,
+      exchangeUnit: btc
     }
   ]
 }
+
+setInterval(() => {
+  state.uplinks[2].balance$.next(state.uplinks[2].balance$.value.plus(0.00128))
+}, 500)
+
+export default state
