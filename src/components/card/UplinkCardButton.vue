@@ -160,10 +160,10 @@ export default {
           @include pulsate('bounce-right', translateX(-4px), translateX(4px));
         }
       }
-    }
 
-    &__label {
-      color: $secondary;
+      &__label {
+        color: $secondary;
+      }
     }
   }
 }
