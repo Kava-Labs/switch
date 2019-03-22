@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="amount-input">
     <div class="mdc-text-field mdc-text-field--outlined" ref="mdc-text-field">
       <input
         type="text"
@@ -68,21 +68,20 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 // All follow MDC styles will use Rubik
 $mdc-typography-font-family: 'Rubik';
 @import '~@material/textfield/mdc-text-field';
 
-// TODO Share styles for *balance* and *asset code* between components
-
 $transition-color: 0.2s color $easing-standard;
 
 .amount-input {
+  display: flex;
+  flex-flow: column nowrap;
+
   &__asset-code {
+    @extend %asset-code;
     color: $primary-700;
-    font-weight: 500;
-    font-size: 12pt;
-    letter-spacing: 1.25pt;
     align-self: center;
     position: absolute;
     right: 15px;
@@ -97,13 +96,11 @@ $transition-color: 0.2s color $easing-standard;
     font-size: 14pt;
     font-weight: 500;
     letter-spacing: 0.1ch;
-    // Appears material-ui adds this, but override it to stay consistent with cards?
-    -webkit-font-smoothing: auto;
     font-variant-numeric: tabular-nums;
     transition: $transition-color;
 
     &__dollar-sign {
-      margin-right: 2px;
+      margin-right: 1px;
     }
   }
 }
@@ -119,8 +116,6 @@ $transition-color: 0.2s color $easing-standard;
     @include mdc-text-field-caret-color($primary-700);
     @include mdc-text-field-label-color($primary-700);
   }
-
-  // TODO Change unfocused color of text to be --- medium emphasis?
 
   &--focused {
     // Label and outline change to orange on focus
@@ -138,8 +133,9 @@ $transition-color: 0.2s color $easing-standard;
     font-size: 18pt;
     font-weight: 300;
     letter-spacing: 0.1ch;
-    -webkit-font-smoothing: auto;
     font-variant-numeric: tabular-nums;
+    // Appears material-ui adds this, but override it to stay consistent with cards?
+    -webkit-font-smoothing: auto;
   }
 }
 </style>

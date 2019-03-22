@@ -1,14 +1,22 @@
+// Layout
+
+$content-max-width: 1000px;
+
 // Colors
 
 $light: white;
 $dark: #f5f5f5;
 
-// TODO 87%, 60%, and 38% are used alot -- is there a way to do a "text opacity" class or something? (difference between light/dark)
+// TODO Switch to this instead? Looks better supported: https://github.com/shakacode/sass-resources-loader
+// TODO Use mixins with an enum for light/dark h1, h2, etc? Different colors
+
 $text-black-high-emphasis: rgba(0, 0, 0, 0.87);
 $text-black-medium-emphasis: rgba(0, 0, 0, 0.6);
 $text-black-disabled: rgba(0, 0, 0, 0.38);
 
-// TODO Add light text with different colors
+$text-white-high-emphasis: rgba(255, 255, 255, 0.87);
+$text-white-medium-emphasis: rgba(255, 255, 255, 0.6);
+$text-white-disabled: rgba(255, 255, 255, 0.38);
 
 $primary: #2d3142;
 $primary-50: #d2d7e8;
@@ -35,24 +43,6 @@ $secondary-800: #d72825;
 $secondary-900: #c81c18;
 
 // Typography
-
-// TODO Find a better way to do this
-
-.h1,
-.h2,
-.h3,
-.h4,
-.h5,
-.h6,
-.body-1,
-.body-2,
-.subtitle-1,
-.subtitle-2,
-.button,
-.caption,
-.overline {
-  font-family: Rubik;
-}
 
 .h1,
 .h2,
@@ -160,3 +150,13 @@ $secondary-900: #c81c18;
 $easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
 $easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
 $easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
+
+// Shared UI elements
+
+%asset-code {
+  font-weight: 500;
+  font-size: 12pt;
+  letter-spacing: 1.25pt;
+  user-select: none;
+  color: $text-black-high-emphasis;
+}

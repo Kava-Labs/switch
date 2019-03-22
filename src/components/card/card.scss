@@ -3,28 +3,22 @@
 $card-width: 85.6mm;
 $card-height: 54mm;
 $card-radii: 3.175mm;
+$card-inner-padding: 22px;
 
-// TODO Stricter compliance to BEM:
-// .card isn't used, .card--flipped is used on .card__flip-container, etc
+.card-perspective {
+  width: $card-width;
+  height: $card-height;
+  perspective: 1000px;
+}
 
 .card {
-  &__perspective-container {
-    width: $card-width;
-    height: $card-height;
-    perspective: 1000px;
-  }
-
-  &__flip-container {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    transition: 0.25s transform $easing-standard;
-    transform-style: preserve-3d;
-
-    &.card--flipped {
-      transform: rotateY(180deg);
-    }
-  }
+  $self: &;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: 0.25s transform $easing-standard;
+  transform-style: preserve-3d;
+  outline: none; // TODO Bad for accessibility; better solution? http://www.outlinenone.com
 
   &__front,
   &__back {
@@ -44,13 +38,16 @@ $card-radii: 3.175mm;
     z-index: 2;
     background-repeat: no-repeat;
     background-clip: border-box;
-    cursor: pointer;
     transition: 0.2s box-shadow, 0.2s transform, 0.2s opacity;
     transition-timing-function: $easing-standard;
 
-    &:hover:not(.card--selected) {
-      transform: translateY(-6px) scale(1.02);
-      box-shadow: 0 10px 20px 4px rgba(40, 51, 75, 0.25);
+    &.card--selectable {
+      cursor: pointer;
+
+      &:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 10px 20px 4px rgba(40, 51, 75, 0.25);
+      }
     }
 
     &.card--selected {
@@ -59,39 +56,34 @@ $card-radii: 3.175mm;
     }
 
     &__balance {
-      width: 100px;
-      height: 100px;
-
       position: absolute;
-      right: 22px;
-      top: 22px;
-
+      right: $card-inner-padding;
+      top: $card-inner-padding;
       display: flex;
       flex-flow: column nowrap;
       justify-content: flex-start;
       align-items: flex-end;
-
-      font-family: 'Rubik';
     }
 
     &__balance__amount {
       font-weight: 300;
       font-size: 18pt;
-      letter-spacing: 0.1ch;
       font-variant-numeric: tabular-nums;
+      letter-spacing: 0.1ch;
+      color: $text-black-high-emphasis;
     }
 
     &__balance__asset-code {
-      font-weight: 500;
-      font-size: 12pt;
-      letter-spacing: 1.25pt;
+      @extend %asset-code;
     }
 
     &__connector-icon {
       width: 80px;
       position: absolute;
-      right: 22px;
-      bottom: 22px;
+      right: $card-inner-padding;
+      bottom: $card-inner-padding;
+      user-select: none;
+      -webkit-user-drag: none;
     }
   }
 
@@ -100,6 +92,7 @@ $card-radii: 3.175mm;
     transform: rotateY(180deg);
     display: flex;
     flex-flow: column nowrap;
+    cursor: pointer;
 
     &__stripe {
       height: 40px;
@@ -113,176 +106,50 @@ $card-radii: 3.175mm;
       justify-content: center;
     }
   }
-}
 
-// Card button
-
-.card__button {
-  flex-grow: 1;
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  cursor: pointer;
-
-  &__icon {
-    width: 72px;
-    fill: rgba(0, 0, 0, 0);
-    stroke: #2d3142;
-    stroke-width: 1.2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    transition: 200ms stroke $easing-standard;
+  &--flipped {
+    transform: rotateY(180deg);
   }
 
-  @mixin pulsate($name, $low, $high) {
-    transform-origin: center;
-    animation-name: pulsate-#{$name};
-    animation-duration: 600ms;
-    // Trigger the animation to begin EXACTLY in the middle of $low and $high
-    // 600ms - (0.8 * 0.9 * 600ms) => 168ms
-    // - 0.8 is a constant from the bezier curve (use Desmos for calculations)
-    // - 0.9 because $low begins at 0% and $high ends at 90% of the progression
-    // - 600ms is the duration of the animation
-    // - Negative delay is a hack to trigger the animation to play immediately,
-    //   but at that time in its execution
-    animation-delay: -168ms;
-    animation-timing-function: $easing-decelerate;
-    animation-iteration-count: infinite;
-
-    @keyframes pulsate-#{$name} {
-      0% {
-        opacity: 0;
-        transform: $low;
-      }
-
-      30% {
-        opacity: 1;
-      }
-
-      60% {
-        opacity: 1;
-      }
-
-      90% {
-        opacity: 0;
-        transform: $high;
-      }
-
-      100% {
-        opacity: 0;
-      }
-    }
-  }
-
-  &__label {
-    @extend %button;
-    margin: 10px 0 0 0;
-    text-transform: uppercase;
-    transition: 0.2s color $easing-standard;
-  }
-
-  &:hover {
-    .card__button__icon {
-      stroke: $secondary;
-
-      .--grow {
-        @include pulsate('grow', scale(0.8), scale(1.2));
-      }
-
-      .--bounce-up {
-        @include pulsate('bounce-up', translateY(4px), translateY(-4px));
-      }
-
-      .--bounce-down {
-        @include pulsate('bounce-down', translateY(-4px), translateY(4px));
-      }
-
-      .--bounce-right {
-        @include pulsate('bounce-right', translateX(-4px), translateX(4px));
-      }
-    }
-
-    .card__button__label {
-      color: $secondary;
-    }
-  }
-}
-
-// Add uplink card
-
-.add-card {
-  width: $card-width;
-  height: $card-height;
-  border-radius: $card-radii;
-  box-sizing: border-box;
-  background: #f0efef;
-  display: flex;
-  justify-content: stretch;
-  align-items: stretch;
-  transition: 0.2s box-shadow;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:hover {
-    cursor: pointer;
-    box-shadow: 0 10px 20px rgba(40, 51, 75, 0.45);
-  }
-}
-
-// ETH card
-
-.card--eth {
-  .card {
-    &__front {
-      background-image: url('../../assets/ethereum-logo.svg');
+  &--eth {
+    #{ $self }__front {
+      background-image: url('~@/assets/ethereum-logo.svg');
       background-position: -35px top;
       background-size: 180px;
     }
   }
-}
 
-// BTC card
-
-.card--btc {
-  .card {
-    &__front {
-      background-image: url('../../assets/lightning-logo.png');
+  &--btc {
+    #{ $self }__front {
+      background-image: url('~@/assets/lightning-logo.png');
       background-position: left -40px top -40px;
       background-size: 250px;
     }
   }
-}
 
-// XRP card
+  $xrp-accent: #23292f;
+  &--xrp {
+    #{ $self } {
+      &__front {
+        background-color: $xrp-accent;
+        background-image: url('~@/assets/xrp-logo.svg');
+        background-position: left -54px center;
+        background-size: auto 210px;
 
-$xrp-accent: #23292f;
-
-.card--xrp {
-  .card {
-    &__front {
-      background-color: $xrp-accent;
-      background-image: url('../../assets/xrp-logo.svg');
-      background-position: left -54px center;
-      background-size: auto 210px;
-      color: white;
-    }
-
-    &__back {
-      background-color: $xrp-accent;
-
-      &__stripe {
-        background: black;
-      }
-    }
-
-    &__button {
-      &__icon {
-        stroke: white;
+        &__balance {
+          // Needs additional specificity to override previous style
+          &__amount, &__asset-code {
+            color: white;
+          }
+        }
       }
 
-      &__label {
-        color: white;
+      &__back {
+        background-color: $xrp-accent;
+
+        &__stripe {
+          background: black;
+        }
       }
     }
   }

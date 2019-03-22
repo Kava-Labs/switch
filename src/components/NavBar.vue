@@ -1,6 +1,6 @@
 <template>
   <nav class="navbar">
-    <img class="logo" src="../assets/switch-logo.svg">
+    <img class="logo" src="@/assets/switch-logo.svg" />
   </nav>
 </template>
 
@@ -15,5 +15,7 @@
 
 .navbar .logo {
   height: 30px;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 </style>
