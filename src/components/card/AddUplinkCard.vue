@@ -15,18 +15,18 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import './card';
-
 .add-card {
   width: $card-width;
   height: $card-height;
   border-radius: $card-radii;
   box-sizing: border-box;
   background: #f0efef;
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: stretch;
   align-items: stretch;
-  transition: 0.2s box-shadow $easing-standard;
+  transition: 200ms box-shadow $easing-standard;
 
   &:hover {
     cursor: pointer;

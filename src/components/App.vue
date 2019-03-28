@@ -1,28 +1,38 @@
 <template>
   <div id="app">
     <NavBar />
-    <Home />
-    <Swap :source-uplink="uplinks[2]" :destination-uplink="uplinks[0]" />
+    <transition name="component-fade" mode="out-in" appear>
+      <component
+        :is="currentRouteComponent"
+        :route-info="$store.state.route"
+      ></component>
+    </transition>
   </div>
 </template>
 
-<script>
-import state from '@/store'
+<script lang="ts">
 import NavBar from '@/components/NavBar.vue'
-import Home from '@/components/home/Home.vue'
+import Home from '@/components/Home.vue'
 import Swap from '@/components/swap/Swap.vue'
+import Vue from 'vue'
 
-export default {
-  name: 'app',
+import BigNumber from 'bignumber.js' // TODO remove this!
+import { xrp } from '@kava-labs/crypto-rate-utils'
+
+export default Vue.extend({
+  name: 'App',
   components: {
     NavBar,
     Home,
     Swap
   },
-  data() {
-    return state
+  computed: {
+    currentRouteComponent(): typeof Swap | typeof Home {
+      /** TODO How to type Vue store? this is `any` */
+      return this.$store.state.route.name === 'swap' ? Swap : Home
+    }
   }
-}
+})
 </script>
 
 <style lang="scss">
@@ -62,5 +72,19 @@ html {
   margin: 0;
   padding: 0;
   font-family: 'Rubik';
+}
+
+.component-fade-enter-active,
+.component-fade-leave-active {
+  transition: opacity, transform;
+  transition-duration: 300ms;
+  transition-timing-function: $easing-standard;
+  transform: translateZ(0);
+}
+
+.component-fade-enter,
+.component-fade-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
 }
 </style>

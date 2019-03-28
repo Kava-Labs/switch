@@ -1,14 +1,6 @@
 <template>
-  <div
-    class="card-button"
-    :class="{ 'card-button--dark': darkTheme }"
-    @click.stop
-  >
-    <svg
-      class="card-button__icon"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-    >
+  <div class="card-button" :class="{ 'card-button--dark': darkTheme }">
+    <svg class="card-button__icon" viewBox="0 0 24 24">
       <path
         v-if="type === 'deposit'"
         class="card-button__icon--bounce-up"
@@ -42,11 +34,12 @@
 export default {
   props: {
     type: {
-      // The value must match one of these strings
+      required: true,
       validator: value =>
         ['deposit', 'swap', 'withdraw', 'remove', 'add'].includes(value)
     },
     label: {
+      default: undefined,
       type: String
     },
     darkTheme: {
@@ -58,8 +51,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import './card';
-
 .card-button {
   $self: &;
   flex-grow: 1;
