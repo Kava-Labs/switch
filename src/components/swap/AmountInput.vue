@@ -1,12 +1,13 @@
 <template>
   <div class="amount-input">
-    <div class="mdc-text-field mdc-text-field--outlined" ref="mdc-text-field">
+    <div ref="mdc-text-field" class="mdc-text-field mdc-text-field--outlined">
       <input
+        id="tf-outlined"
+        ref="text-input"
+        class="mdc-text-field__input"
         type="text"
         :value="amount"
         @input.stop="emitInput"
-        id="tf-outlined"
-        class="mdc-text-field__input"
       />
       <div class="amount-input__asset-code">{{ assetCode }}</div>
       <div class="mdc-notched-outline">
@@ -32,20 +33,46 @@ import { MDCTextField } from '@material/textfield'
 export default {
   props: {
     label: {
-      type: String,
-      required: true
+      required: true,
+      type: String
     },
     assetCode: {
-      type: String,
-      required: true
+      required: true,
+      type: String
     },
     amount: {
       required: true,
       validator: value => typeof value === 'string' || value === null
     },
-    amountUsd: String
+    amountUsd: {
+      default: undefined,
+      type: String
+    },
+    focused: {
+      default: false,
+      type: Boolean
+    }
+  },
+
+  /**
+   * TODO Should this be replaced with the text field from material-components-vue? Looks pretty good!
+   * (I'm also implementing some of this wrong; .destroy() on component should be called when removed from DOM)
+   */
+
+  mounted() {
+    this.initTextField()
+
+    if (this.focused) {
+      this.$refs['text-input'].focus()
+    }
+  },
+  updated() {
+    this.initTextField()
   },
   methods: {
+    initTextField() {
+      new MDCTextField(this.$refs['mdc-text-field'])
+    },
     emitInput(event) {
       this.$emit('input', event.target.value)
 
@@ -53,23 +80,11 @@ export default {
       // so the data flow is unidirectional
       this.$forceUpdate()
     }
-  },
-  data() {
-    return {
-      textField: null
-    }
-  },
-  mounted() {
-    this.textField = new MDCTextField(this.$refs['mdc-text-field'])
-  },
-  updated() {
-    this.textField = new MDCTextField(this.$refs['mdc-text-field'])
   }
 }
 </script>
 
 <style lang="scss">
-// All follow MDC styles will use Rubik
 $mdc-typography-font-family: 'Rubik';
 @import '~@material/textfield/mdc-text-field';
 

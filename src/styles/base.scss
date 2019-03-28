@@ -153,6 +153,11 @@ $easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
 
 // Shared UI elements
 
+$card-width: 85.6mm;
+$card-height: 54mm;
+$card-radii: 3.175mm;
+$card-inner-padding: 22px;
+
 %asset-code {
   font-weight: 500;
   font-size: 12pt;
