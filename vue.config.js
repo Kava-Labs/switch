@@ -1,42 +1,42 @@
 const path = require('path')
-const glob = require('fast-glob')
-const _ = require('lodash')
 const webpack = require('webpack')
-
-// TODO Better solution?
-let skips = ['electron', 'npm']
-let externals = _.uniq(
-  glob
-    .sync(
-      ['gyp'].map(v => {
-        return `node_modules/**/*.${v}`
-      })
-    )
-    .map(v => v.split('/')[1])
-    .filter(v => {
-      return skips.indexOf(v) == -1
-    })
-).sort()
+const { fetch } = require('envkey/loader')
 
 module.exports = {
-  // Automatically import base styles everywhere
   pluginOptions: {
+    // Automatically import base styles into every Vue component <style>
     'style-resources-loader': {
       patterns: [path.resolve(__dirname, 'src/styles/*.scss')],
       preProcessor: 'scss'
     },
     electronBuilder: {
-      // List native deps here if they don't work
-      externals
+      appId: 'io.kava.switch',
+      productName: 'Switch',
+      chainWebpackRendererProcess: config => {
+        /**
+         * When Webpack builds for the "electron-renderer" target, it prioritizes
+         * the entry for the package.json `browser` field above `main`
+         *
+         * - Some modules, such as ws and ripple-lib, have different behavior in the browser,
+         *   so don't resolve the browser field
+         * - Only apply this for Electron builds, and not browser builds
+         */
+        config.resolve.mainFields
+          .clear()
+          .add('main')
+          .add('module')
+      }
     }
   },
-  // TODO Is this necessary?
-  configureWebpack(config) {
-    config.plugins.push(new webpack.ExternalsPlugin('commonjs', externals))
-    config.resolve.alias.ws = path.resolve(
-      __dirname,
-      'node_modules/ws/index.js'
-    )
+  configureWebpack: {
+    plugins: [
+      new webpack.EnvironmentPlugin({
+        // TODO Disable both of these in production!
+        // DEBUG: '"ilp*,switch*"',
+        // Load vars from envkey
+        ...fetch()
+      })
+    ]
   },
   /*
    * Importing MDC component styles causes issues with our Webpack config, which this fixes:

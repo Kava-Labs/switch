@@ -3,6 +3,7 @@ import {
   createProtocol,
   installVueDevtools
 } from 'vue-cli-plugin-electron-builder/lib'
+import path from 'path'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -13,7 +14,15 @@ let win: BrowserWindow | null
 protocol.registerStandardSchemes(['app'], { secure: true })
 function createWindow() {
   // Create the browser window.
-  win = new BrowserWindow({ width: 1280, height: 800 })
+  win = new BrowserWindow({
+    width: 1280,
+    height: 800,
+    minWidth: 980,
+    minHeight: 560,
+    center: true,
+    show: false,
+    icon: path.join(__static, 'icon.png')
+  })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -24,6 +33,12 @@ function createWindow() {
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
   }
+
+  win.once('ready-to-show', () => {
+    if (win) {
+      win.show()
+    }
+  })
 
   win.on('closed', () => {
     win = null

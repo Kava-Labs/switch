@@ -6,7 +6,6 @@
     "importHelpers": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "baseUrl": ".",
     "types": ["webpack-env"],
@@ -16,8 +15,9 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "lib": ["esnext", "dom", "dom.iterable"]
+    "lib": ["esnext", "dom"],
+    "pretty": true,
+    "outDir": "dist_electron"
   },
-  "include": ["src/**/*.ts", "src/**/*.vue", "types/shims-vue.d.ts"],
-  "exclude": ["node_modules"]
+  "include": ["types/**/*.d.ts", "src/**/*.ts", "src/**/*.vue"]
 }
