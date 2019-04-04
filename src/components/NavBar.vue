@@ -1,26 +1,30 @@
 <template>
   <header class="header">
     <nav class="header__nav">
-      <transition name="fade">
+      <transition name="fade" appear>
         <div v-if="showBackButton" class="header__nav__back-button">
           <m-icon-button @click="cancelSwap">
             <svg class="header__nav__back-button__icon" viewBox="0 0 24 24">
-              <path d="M19 12H6M12 5l-7 7 7 7"></path>>
+              <path d="M19 12H6M12 5l-7 7 7 7"></path>
+              >
             </svg>
           </m-icon-button>
         </div>
       </transition>
-      <img class="header__nav__logo" src="@/assets/switch-logo.svg">
+      <img class="header__nav__logo" src="@/assets/switch-logo.svg" />
     </nav>
     <transition name="fly-in" mode="out-in">
-      <nav class="header__select-bar" v-if="showSelectDestBar">
-        <span class="header__select-bar__title">Select an asset to receive</span>
+      <nav v-if="showSelectDestBar" class="header__select-bar">
+        <span class="header__select-bar__title"
+          >Select an asset to receive</span
+        >
         <m-button
           class="header__select-bar__cancel-button"
           outlined
           dense
           @click="cancelSwap"
-        >Cancel</m-button>
+          >Cancel</m-button
+        >
       </nav>
     </transition>
   </header>
@@ -43,15 +47,21 @@ export default {
       )
     },
     showBackButton() {
-      return this.$store.state.route.name === 'swap'
+      return (
+        this.$store.state.route.name === 'swap' &&
+        !this.$store.state.route.isStreaming
+      )
     }
   },
   methods: {
     cancelSwap() {
-      this.$store.commit('NAVIGATE_TO', {
-        name: 'home',
-        selectedSourceUplink: null
-      })
+      const route = this.$store.state.route
+      if (route.name !== 'swap' || !route.isStreaming) {
+        this.$store.commit('NAVIGATE_TO', {
+          name: 'home',
+          selectedSourceUplink: null
+        })
+      }
     }
   }
 }
@@ -81,18 +91,8 @@ $mdc-theme-primary: white;
       left: 0;
 
       &.fade-enter-active {
-        transition: opacity 300ms $easing-decelerate;
         // The old route takes 300ms to fade out, so don't start fading in until the new route begins fading in
         transition-delay: 300ms;
-      }
-
-      &.fade-leave-active {
-        transition: opacity 300ms $easing-accelerate;
-      }
-
-      &.fade-enter,
-      &.fade-leave-to {
-        opacity: 0;
       }
 
       &__icon {

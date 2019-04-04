@@ -3,34 +3,38 @@
     <span class="swap__source-header">Send</span>
     <span class="swap__destination-header">Receive</span>
     <UplinkCard
+      :key="`uplink-${routeInfo.sourceUplink}`"
       class="swap__source-uplink"
       :uplink="sourceUplink"
       display="static"
     />
     <UplinkCard
+      :key="`uplink-${routeInfo.destinationUplink}`"
       class="swap__destination-uplink"
       :uplink="destinationUplink"
       display="static"
     />
     <img
       class="swap__interledger-logo"
-      :class="{ 'swap__interledger-logo--spin': isStreaming }"
+      :class="{ 'swap__interledger-logo--spin': routeInfo.isStreaming }"
       src="~@/assets/interledger-logo.svg"
     />
     <div class="swap__source-pipe">
       <div
-        v-for="packet in moneyOut"
-        :key="packet"
+        v-for="(isActive, index) in activeMoneyOut"
+        :key="`money-out-${index}`"
         class="swap__packet"
-        @animationend="removeMoneyOut(packet)"
+        :class="{ 'swap__packet--active': isActive }"
+        @animationend="toggleMoneyOut(index)"
       ></div>
     </div>
     <div class="swap__destination-pipe">
       <div
-        v-for="packet in moneyIn"
-        :key="packet"
+        v-for="(isActive, index) in activeMoneyIn"
+        :key="`money-in-${index}`"
         class="swap__packet"
-        @animationend="removeMoneyIn(packet)"
+        :class="{ 'swap__packet--active': isActive }"
+        @animationend="toggleMoneyIn(index)"
       ></div>
     </div>
     <AmountInput
@@ -49,30 +53,32 @@
       label="Receive amount"
       @input="handleDestAmountInput"
     />
-    <div class="swap__actions">
-      <button
-        ref="mdc-go-button"
-        class="swap__actions__go-button mdc-button mdc-button--outlined"
-        @click="startStream"
-      >
-        <span class="mdc-button__label">Go</span>
-        <svg class="mdc-button__icon" viewBox="0 0 24 24">
-          <polygon points="5 3 19 12 5 21 5 3"></polygon>
-        </svg>
-      </button>
-      <button
-        ref="mdc-flip-button"
-        class="swap__actions__flip-button mdc-button"
-        @click="flipUplinks"
-      >
-        <span class="mdc-button__label">Flip</span>
-        <svg class="mdc-button__icon" viewBox="0 0 24 24">
-          <path d="M17 2.1l4 4-4 4"></path>
-          <path d="M3 12.2v-2a4 4 0 0 1 4-4h12.8M7 21.9l-4-4 4-4"></path>
-          <path d="M21 11.8v2a4 4 0 0 1-4 4H4.2"></path>
-        </svg>
-      </button>
-    </div>
+    <transition name="fade" mode="out-in" appear>
+      <div v-if="!routeInfo.isStreaming" class="swap__actions">
+        <button
+          ref="mdc-go-button"
+          class="swap__actions__go-button mdc-button mdc-button--outlined"
+          @click="startStream"
+        >
+          <span class="mdc-button__label">Go</span>
+          <svg class="mdc-button__icon" viewBox="0 0 24 24">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        </button>
+        <button
+          ref="mdc-flip-button"
+          class="swap__actions__flip-button mdc-button"
+          @click="flipUplinks"
+        >
+          <span class="mdc-button__label">Flip</span>
+          <svg class="mdc-button__icon" viewBox="0 0 24 24">
+            <path d="M17 2.1l4 4-4 4"></path>
+            <path d="M3 12.2v-2a4 4 0 0 1 4-4h12.8M7 21.9l-4-4 4-4"></path>
+            <path d="M21 11.8v2a4 4 0 0 1-4 4H4.2"></path>
+          </svg>
+        </button>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -82,12 +88,13 @@ import AmountInput from './AmountInput.vue'
 import BigNumber from 'bignumber.js'
 import { convert, usd, connectCoinCap } from '@kava-labs/crypto-rate-utils'
 import { Uplink } from '@/store'
+import { MDCRipple } from '@material/ripple'
 import Vue from 'vue'
+import { from } from 'rxjs'
+import { pairwise, filter, takeUntil } from 'rxjs/operators'
 
 const MAX_TRADE_SIZE = usd(10)
 const MAX_SLIPPAGE = 0.99
-
-// TODO Add a min trade size in usd -- otherwise it may fail due to exchange rates?
 
 export default {
   components: { UplinkCard, AmountInput },
@@ -96,25 +103,14 @@ export default {
       type: Object,
       required: true
     }
-    // sourceUplink: {
-    //   type: Object,
-    //   required: true
-    // },
-    // destinationUplink: {
-    //   type: Object,
-    //   required: true
-    // }
   },
   data() {
     return {
-      rateApi: null,
       sourceAmount: null,
       destAmount: null,
-      buttonRipple: null, // TODO remove this!
-      // TODO Add rendering for this!
-      moneyOut: [],
-      moneyIn: [],
-      isStreaming: false
+      /** Active dots animating settlements (only 3 at a time) */
+      activeMoneyOut: [false, false, false],
+      activeMoneyIn: [false, false, false]
     }
   },
   computed: {
@@ -135,37 +131,46 @@ export default {
       return this.destinationUplink.unit
     },
     sourceAmountUsd() {
+      // e.g. if sourceAmount=".", prevent $NaN
       const showUsdAmount =
-        this.rateApi &&
-        this.sourceAmount &&
-        // e.g. if sourceAmount=".", prevent $NaN
-        !new BigNumber(this.sourceAmount).isNaN()
+        this.sourceAmount && !new BigNumber(this.sourceAmount).isNaN()
 
       return showUsdAmount
-        ? convert(
-            this.sourceUnit(this.sourceAmount),
-            usd(),
-            this.rateApi
-          ).toFixed(2, BigNumber.ROUND_CEIL)
+        ? '$' +
+            convert(
+              this.sourceUnit(this.sourceAmount),
+              usd(),
+              this.$store.getters.rateApi
+            ).toFixed(2, BigNumber.ROUND_CEIL)
         : null
+    },
+    // TODO Replace with availableToSend
+    sourceOutgoingCapacity() {
+      return this.sourceUplink.outgoingCapacity$.value
+    },
+    // TODO Replace with availableToReceive
+    destinationIncomingCapacity() {
+      return this.destinationUplink.incomingCapacity$.value
     }
   },
-  async created() {
-    this.rateApi = await connectCoinCap()
+  // When capacity changes, update the amount of available capacity
+  watch: {
+    sourceOutgoingCapacity() {
+      this.handleSourceAmountInput(this.sourceAmount)
+    },
+    destinationIncomingCapacity() {
+      this.handleSourceAmountInput(this.sourceAmount)
+    }
   },
   mounted() {
     this.initButtons()
   },
-  updated() {
-    this.initButtons()
-  },
-
-  // TODO Fix Prettier/autoformat not working correctly in VS Code -- could save me lots of time!
-  // TODO Should is be using eslint for autoformatting instead?
-
+  // updated() {
+  //   this.initButtons()
+  // },
   methods: {
     flipUplinks() {
-      if (this.isStreaming) {
+      if (this.routeInfo.isStreaming) {
         return
       }
 
@@ -186,54 +191,95 @@ export default {
 
     async startStream() {
       if (!this.sourceAmount) {
-        return // TODO
+        return
       }
 
       // Prevent multiple streams simultaneously
-      if (this.isStreaming) {
+      if (this.routeInfo.isStreaming) {
         return
       }
-      this.isStreaming = true
+      this.$store.commit('NAVIGATE_TO', {
+        ...this.routeInfo,
+        isStreaming: true
+      })
 
-      // TODO Clear input fields? Hide them?
+      const streamComplete = this.$store.state.api
+        .streamMoney({
+          amount: new BigNumber(this.sourceAmount),
+          source: this.sourceUplink.getInternal(),
+          dest: this.destinationUplink.getInternal()
+        })
+        .finally(() => {
+          this.$store.commit('NAVIGATE_TO', {
+            ...this.routeInfo,
+            isStreaming: false
+          })
+        })
+
+      // Animate dots as settlements go out/come in
+
+      this.sourceUplink.balance$
+        .pipe(
+          pairwise(),
+          filter(([oldBalance, newBalance]) =>
+            newBalance.isLessThan(oldBalance)
+          ),
+          takeUntil(from(streamComplete))
+        )
+        .subscribe(() => {
+          for (const [index, isActive] of this.activeMoneyOut.entries()) {
+            if (!isActive) {
+              Vue.set(this.activeMoneyOut, index, true)
+              break
+            }
+          }
+        })
+
+      this.destinationUplink.balance$
+        .pipe(
+          pairwise(),
+          filter(([oldBalance, newBalance]) =>
+            newBalance.isGreaterThan(oldBalance)
+          ),
+          takeUntil(from(streamComplete))
+        )
+        .subscribe(() => {
+          for (const [index, isActive] of this.activeMoneyIn.entries()) {
+            if (!isActive) {
+              Vue.set(this.activeMoneyIn, index, true)
+              break
+            }
+          }
+        })
+
+      await streamComplete
 
       // TODO Show check mark when streaming is complete?
 
-      const { moneyIn$, moneyOut$ } = await this.$parent.streamMoney({
-        amount: new BigNumber(this.sourceAmount),
-        source: this.sourceUplink,
-        dest: this.destinationUplink,
-        rateApi: this.rateApi
-      })
-
-      moneyIn$.subscribe(
-        () => this.moneyIn.push(Math.random().toString()),
-        () => {
-          // TODO Show error toast? Idk!
-        },
-        () => {
-          this.isStreaming = false
-        }
-      )
-
-      moneyOut$.subscribe(() => {
-        this.moneyOut.push(Math.random().toString())
-      })
+      // Update the input fields since the capacity may have changed
+      this.handleSourceAmountInput(this.sourceAmount)
     },
-    removeMoneyOut(id) {
-      this.moneyOut = this.moneyOut.filter(val => val !== id)
+    toggleMoneyOut(index) {
+      Vue.set(this.activeMoneyOut, index, false)
     },
-    removeMoneyIn(id) {
-      this.moneyIn = this.moneyIn.filter(val => val !== id)
+    toggleMoneyIn(index) {
+      Vue.set(this.activeMoneyIn, index, false)
     },
+    // TODO Replace this with material-components-vue to prevent some errors in logs
+    // TODO Don't do this on update! probs super slooww!
     initButtons() {
       new MDCRipple(this.$refs['mdc-go-button'])
       new MDCRipple(this.$refs['mdc-flip-button'])
     },
     // TODO Abstract some of this code !
     handleSourceAmountInput(input) {
+      if (this.routeInfo.isStreaming) {
+        this.sourceAmount = this.sourceAmount
+        return
+      }
+
       // Allow the fields to be cleared
-      if (input.length === 0) {
+      if (!input || input.length === 0) {
         this.sourceAmount = null
         this.destAmount = null
         return
@@ -246,15 +292,11 @@ export default {
         return
       }
 
-      if (!this.rateApi) {
-        return
-      }
-
       let sourceAmount = parsedInput
       const exchangeRate = convert(
         this.sourceUnit(),
         this.destinationUnit(),
-        this.rateApi
+        this.$store.getters.rateApi
       )
 
       let destAmount = convert(
@@ -265,7 +307,7 @@ export default {
       const reverseExchangeRate = new BigNumber(1).dividedBy(exchangeRate)
 
       // Calculate the max destination amount and reduce all values
-      const maxDestAmount = this.destinationUplink.incomingCapacity
+      const maxDestAmount = this.destinationUplink.incomingCapacity$.value
       if (destAmount.isGreaterThan(maxDestAmount)) {
         destAmount = maxDestAmount
         sourceAmount = convert(
@@ -276,11 +318,11 @@ export default {
       }
 
       // Calculate max source amount and reduce all values
-      const outgoingCapacity = this.sourceUplink.outgoingCapacity
+      const outgoingCapacity = this.sourceUplink.outgoingCapacity$.value
       const tradeLimit = convert(
         MAX_TRADE_SIZE,
         this.sourceUnit(),
-        this.rateApi
+        this.$store.getters.rateApi
       )
       const maxSourceAmount = BigNumber.min(outgoingCapacity, tradeLimit)
       if (sourceAmount.isGreaterThan(maxSourceAmount)) {
@@ -318,8 +360,13 @@ export default {
       }
     },
     handleDestAmountInput(input) {
+      if (this.routeInfo.isStreaming) {
+        this.destAmount = this.destAmount
+        return
+      }
+
       // Allow the fields to be cleared
-      if (input.length === 0) {
+      if (!input || input.length === 0) {
         this.sourceAmount = null
         this.destAmount = null
         return
@@ -332,14 +379,10 @@ export default {
         return
       }
 
-      if (!this.rateApi) {
-        return
-      }
-
       const exchangeRate = convert(
         this.sourceUnit(),
         this.destinationUnit(),
-        this.rateApi
+        this.$store.getters.rateApi
       )
       const reverseExchangeRate = new BigNumber(1).dividedBy(exchangeRate)
 
@@ -351,7 +394,7 @@ export default {
       )
 
       // Calculate the max destination amount and reduce all values
-      const maxDestAmount = this.destinationUplink.incomingCapacity
+      const maxDestAmount = this.destinationUplink.incomingCapacity$.value
       if (destAmount.isGreaterThan(maxDestAmount)) {
         destAmount = maxDestAmount
         sourceAmount = convert(
@@ -362,16 +405,16 @@ export default {
       }
 
       // Calculate max source amount and reduce all values
-      const outgoingCapacity = this.sourceUplink.outgoingCapacity
+      const outgoingCapacity = this.sourceUplink.outgoingCapacity$.value
       const tradeLimit = convert(
         MAX_TRADE_SIZE,
         this.sourceUnit(),
-        this.rateApi
+        this.$store.getters.rateApi
       )
       const maxSourceAmount = BigNumber.min(
         outgoingCapacity,
         tradeLimit,
-        sourceAmount.dividedBy(MAX_SLIPPAGE) // TODO !?!?
+        sourceAmount.dividedBy(MAX_SLIPPAGE)
       )
       if (sourceAmount.isGreaterThan(maxSourceAmount)) {
         sourceAmount = maxSourceAmount
@@ -409,7 +452,6 @@ export default {
 
 <style lang="scss" scoped>
 $mdc-theme-primary: $secondary;
-// $mdc-theme-secondary: $secondary;
 $mdc-typography-font-family: 'Rubik';
 @import '@material/button/mdc-button';
 
@@ -417,7 +459,7 @@ $mdc-typography-font-family: 'Rubik';
   max-width: $content-max-width;
   margin: 20px auto;
   display: grid;
-  grid-template-columns: auto 1fr 100px 1fr auto;
+  grid-template-columns: auto 1fr 80px 1fr auto;
   grid-template-rows: auto auto 50px auto;
   grid-template-areas:
     'source-header  .           .         .         dest-header'
@@ -448,7 +490,7 @@ $mdc-typography-font-family: 'Rubik';
   // The Interledger
 
   &__interledger-logo {
-    width: 164px;
+    width: 130px;
     grid-area: connector;
     align-self: center;
     justify-self: center;
@@ -471,7 +513,7 @@ $mdc-typography-font-family: 'Rubik';
         }
       }
 
-      // animation: spin 120ms infinite forwards;
+      animation: spin 200ms infinite forwards;
     }
   }
 
@@ -480,7 +522,7 @@ $mdc-typography-font-family: 'Rubik';
 
   &__source-pipe,
   &__destination-pipe {
-    height: 10px;
+    height: 15px;
     align-self: center;
     position: relative;
     transform-style: preserve-3d;
@@ -492,21 +534,25 @@ $mdc-typography-font-family: 'Rubik';
       }
 
       to {
+        // TODO Calc this so it works depending upon the window size?
         transform: translateX(140px);
       }
     }
 
     // TODO Fix this
     .swap__packet {
-      width: 10px;
-      height: 10px;
+      width: 15px;
+      height: 15px;
       background: $secondary-400;
       border-radius: 50%;
       position: absolute;
       transform: translateX(-20px);
       transform-style: preserve-3d;
-      animation: move 200ms;
-      animation-delay: 100ms;
+      // animation-timing-function: $easing-accelerate;
+
+      &--active {
+        animation: move 150ms;
+      }
     }
   }
 

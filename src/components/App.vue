@@ -1,23 +1,23 @@
 <template>
   <div id="app">
     <NavBar />
-    <transition name="component-fade" mode="out-in" appear>
-      <component
-        :is="currentRouteComponent"
-        :route-info="$store.state.route"
-      ></component>
-    </transition>
+    <keep-alive>
+      <transition name="navigate" mode="out-in" appear>
+        <component
+          :is="currentRouteComponent"
+          :route-info="$store.state.route"
+        />
+      </transition>
+    </keep-alive>
+    <!-- TODO Add mounting for dialogs/toasts here -->
   </div>
 </template>
 
 <script lang="ts">
 import NavBar from '@/components/NavBar.vue'
-import Home from '@/components/Home.vue'
+import Home from '@/components/home/Home.vue'
 import Swap from '@/components/swap/Swap.vue'
 import Vue from 'vue'
-
-import BigNumber from 'bignumber.js' // TODO remove this!
-import { xrp } from '@kava-labs/crypto-rate-utils'
 
 export default Vue.extend({
   name: 'App',
@@ -74,16 +74,20 @@ html {
   font-family: 'Rubik';
 }
 
-.component-fade-enter-active,
-.component-fade-leave-active {
+#app {
+  margin: 0 50px;
+}
+
+.navigate-enter-active,
+.navigate-leave-active {
   transition: opacity, transform;
   transition-duration: 300ms;
   transition-timing-function: $easing-standard;
   transform: translateZ(0);
 }
 
-.component-fade-enter,
-.component-fade-leave-to {
+.navigate-enter,
+.navigate-leave-to {
   opacity: 0;
   transform: translateY(30px);
 }

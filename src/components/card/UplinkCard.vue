@@ -1,6 +1,5 @@
 <template>
   <div class="card-perspective">
-    <!-- TODO To add back hover, add @mouseleave="showFront" to flip-container -->
     <div
       class="card"
       :class="{
@@ -29,6 +28,7 @@
             v-if="uplink.canDeposit"
             type="deposit"
             :dark-theme="darkTheme"
+            @click.native="deposit"
           />
           <UplinkCardButton
             type="swap"
@@ -39,11 +39,13 @@
             v-if="uplink.canWithdraw"
             type="withdraw"
             :dark-theme="darkTheme"
+            @click.native="withdraw"
           />
           <UplinkCardButton
             v-if="!uplink.canWithdraw"
             type="remove"
             :dark-theme="darkTheme"
+            @click.native="remove"
           />
         </div>
       </div>
@@ -115,7 +117,7 @@ export default Vue.extend({
      * - Possible bug: for VERY large balances, it may display inaccurately
      */
     balance(): string {
-      const truncatedBalance = this.uplink.balance
+      const truncatedBalance = this.uplink.balance$.value
         // toFixed() will leave trailing zeros, but decimalPlaces *then* toString won't
         .decimalPlaces(this.uplink.unit().unit, BigNumber.ROUND_DOWN)
         // Use maxDigits + 1 to account for decimal point
@@ -129,7 +131,7 @@ export default Vue.extend({
 
     /** Show full balance on hover in case it's truncated */
     balanceTooltip(): string {
-      return `${this.uplink.balance} ${this.uplink.unit().symbol}`
+      return `${this.uplink.balance$.value} ${this.uplink.unit().symbol}`
     }
   },
   methods: {
@@ -154,6 +156,24 @@ export default Vue.extend({
         this.showFlip = false
         this.$emit('select', this.uplink.id)
       }
+    },
+    deposit() {
+      this.$store.commit('NAVIGATE_TO', {
+        name: 'home',
+        meta: 'deposit',
+        id: this.uplink.id
+      })
+    },
+    withdraw() {
+      this.$store.commit('NAVIGATE_TO', {
+        name: 'home',
+        meta: 'withdrawal',
+        id: this.uplink.id
+      })
+    },
+    async remove() {
+      await this.$store.state.api.remove(this.uplink.getInternal())
+      this.$store.commit('REFRESH_UPLINKS')
     }
   }
 })
@@ -186,8 +206,8 @@ export default Vue.extend({
     left: 0;
     border-radius: $card-radii;
     background: white;
-    backface-visibility: hidden;
-    box-shadow: 0 10px 20px rgba(40, 51, 75, 0.45);
+    backface-visibility: hidden; // Hides box-shadow for the card not visible
+    box-shadow: $card-shadow;
   }
 
   &__front {

@@ -1,6 +1,6 @@
 <template>
   <div class="add-card">
-    <UplinkCardButton type="add" label="Add Uplink" />
+    <UplinkCardButton type="add" label="Add Card" />
   </div>
 </template>
 

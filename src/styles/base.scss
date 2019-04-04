@@ -157,6 +157,7 @@ $card-width: 85.6mm;
 $card-height: 54mm;
 $card-radii: 3.175mm;
 $card-inner-padding: 22px;
+$card-shadow: 0 10px 20px rgba(40, 51, 75, 0.45);
 
 %asset-code {
   font-weight: 500;
@@ -164,4 +165,29 @@ $card-inner-padding: 22px;
   letter-spacing: 1.25pt;
   user-select: none;
   color: $text-black-high-emphasis;
+}
+
+$transition-color: 200ms color $easing-standard;
+%reported-amount {
+  color: $primary-600;
+  font-size: 14pt;
+  font-weight: 500;
+  letter-spacing: 0.1ch;
+  font-variant-numeric: tabular-nums;
+  transition: $transition-color;
+}
+
+// Shared transitions
+
+.fade-enter-active {
+  transition: opacity 300ms $easing-decelerate;
+}
+
+.fade-leave-active {
+  transition: opacity 300ms $easing-accelerate;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }

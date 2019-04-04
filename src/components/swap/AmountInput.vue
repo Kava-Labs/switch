@@ -12,17 +12,16 @@
       <div class="amount-input__asset-code">{{ assetCode }}</div>
       <div class="mdc-notched-outline">
         <div class="mdc-notched-outline__leading"></div>
-        <div class="mdc-notched-outline__notch">
-          <label for="tf-outlined" class="mdc-floating-label">
-            {{ label }}
-          </label>
+        <div v-if="label" class="mdc-notched-outline__notch">
+          <label for="tf-outlined" class="mdc-floating-label">{{
+            label
+          }}</label>
         </div>
         <div class="mdc-notched-outline__trailing"></div>
       </div>
     </div>
-    <div v-if="amountUsd" class="amount-input__usd-amount">
-      <span class="amount-input__usd-amount__dollar-sign">$</span>
-      <span>{{ amountUsd }}</span>
+    <div v-if="amountUsd" class="amount-input__reported-amount">
+      {{ amountUsd }}
     </div>
   </div>
 </template>
@@ -33,7 +32,7 @@ import { MDCTextField } from '@material/textfield'
 export default {
   props: {
     label: {
-      required: true,
+      default: null,
       type: String
     },
     assetCode: {
@@ -88,8 +87,6 @@ export default {
 $mdc-typography-font-family: 'Rubik';
 @import '~@material/textfield/mdc-text-field';
 
-$transition-color: 0.2s color $easing-standard;
-
 .amount-input {
   display: flex;
   flex-flow: column nowrap;
@@ -104,19 +101,10 @@ $transition-color: 0.2s color $easing-standard;
     transition: $transition-color;
   }
 
-  &__usd-amount {
+  &__reported-amount {
+    @extend %reported-amount;
     margin: 10px 0 0 17px;
-    grid-area: usd-amount;
-    color: $primary-600;
-    font-size: 14pt;
-    font-weight: 500;
-    letter-spacing: 0.1ch;
-    font-variant-numeric: tabular-nums;
-    transition: $transition-color;
-
-    &__dollar-sign {
-      margin-right: 1px;
-    }
+    grid-area: reported-amount;
   }
 }
 
@@ -139,7 +127,7 @@ $transition-color: 0.2s color $easing-standard;
     @include mdc-text-field-focused-outline-color($secondary);
 
     .amount-input__asset-code,
-    + .amount-input__usd-amount {
+    + .amount-input__reported-amount {
       color: $text-black-high-emphasis;
     }
   }
