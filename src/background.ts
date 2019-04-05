@@ -12,6 +12,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 // be closed automatically when the JavaScript object is garbage collected.
 let win: BrowserWindow | null
 let winClosing = false
+let shouldQuit = false
 
 // Standard scheme must be registered before the app is ready
 protocol.registerStandardSchemes(['app'], { secure: true })
@@ -52,6 +53,10 @@ function createWindow() {
 
           win = null
           winClosing = false
+
+          if (shouldQuit) {
+            app.quit()
+          }
         }
       })
     }
@@ -61,7 +66,9 @@ function createWindow() {
   menuBuilder.buildMenu()
 }
 
-app.on('before-quit', () => {})
+app.on('before-quit', () => {
+  shouldQuit = true
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
