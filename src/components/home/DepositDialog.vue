@@ -10,9 +10,7 @@
         </p>
         <p
           class="deposit-dialog__custody-notice deposit-dialog__custody-notice--bold"
-        >
-          Only you have access to these funds.
-        </p>
+        >Only you have access to these funds.</p>
         <AmountInput
           class="deposit-dialog__amount-input"
           :amount="depositAmount"
@@ -23,17 +21,12 @@
         />
       </main>
       <footer class="deposit-dialog__actions">
-        <m-button
-          class="deposit-dialog__actions__cancel-button"
-          @click="cancelDeposit"
-          >Cancel</m-button
-        >
+        <m-button class="deposit-dialog__actions__cancel-button" @click="cancelDeposit">Cancel</m-button>
         <m-button
           class="deposit-dialog__actions__accept-button"
           raised
           @click="acceptDeposit"
-          >Deposit</m-button
-        >
+        >Deposit</m-button>
       </footer>
     </section>
   </section>
@@ -126,6 +119,7 @@ export default {
         return
       }
 
+      const uplinkId = this.uplink.id
       this.uplink.activeDeposit = this.$store.state.api
         .deposit({
           uplink: this.uplink.getInternal(),
@@ -138,7 +132,7 @@ export default {
           this.$store.commit('SHOW_TOAST', 'Failed to deposit')
         })
         .finally(() => {
-          this.uplink.activeDeposit = null
+          this.$store.commit('END_DEPOSIT', uplinkId)
         })
 
       this.cancelDeposit()

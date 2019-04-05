@@ -204,6 +204,18 @@ export default new Vuex.Store<State>({
     },
     HIDE_TOAST(state, keyToRemove: string) {
       state.toasts = state.toasts.filter(({ key }) => key !== keyToRemove)
+    },
+    END_DEPOSIT(state, uplinkId: string) {
+      const uplink = state.uplinks.find(({ id }) => id === uplinkId)
+      if (uplink) {
+        uplink.activeDeposit = null
+      }
+    },
+    END_WITHDRAWAL(state, uplinkId: string) {
+      const uplink = state.uplinks.find(({ id }) => id === uplinkId)
+      if (uplink) {
+        uplink.activeWithdrawal = null
+      }
     }
   },
   actions: {

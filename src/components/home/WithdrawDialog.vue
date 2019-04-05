@@ -10,17 +10,12 @@
         </p>
       </main>
       <footer class="withdraw-dialog__actions">
-        <m-button
-          class="withdraw-dialog__actions__cancel-button"
-          @click="cancelWithdrawal"
-          >Cancel</m-button
-        >
+        <m-button class="withdraw-dialog__actions__cancel-button" @click="cancelWithdrawal">Cancel</m-button>
         <m-button
           class="withdraw-dialog__actions__accept-button"
           raised
           @click="startWithdrawal"
-          >Withdraw</m-button
-        >
+        >Withdraw</m-button>
       </footer>
     </section>
   </section>
@@ -48,6 +43,7 @@ export default {
   methods: {
     async startWithdrawal() {
       const uplink = this.uplink.getInternal()
+      const uplinkId = this.uplink.id
 
       this.uplink.activeWithdrawal = this.$store.state.api
         .withdraw({ uplink })
@@ -61,7 +57,7 @@ export default {
           this.$store.commit('SHOW_TOAST', 'Failed to withdraw funds')
         })
         .finally(() => {
-          this.uplink.activeWithdrawal = null
+          this.$store.commit('END_WITHDRAWAL', uplinkId)
         })
 
       this.cancelWithdrawal()
