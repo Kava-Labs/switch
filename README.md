@@ -1,4 +1,4 @@
-<img src="./src/assets/switch-logo.svg" width="200" />
+<img src="./src/assets/switch-logo.svg" width="160" />
 
 - 🏁 **Swap crypto assets in seconds with Interledger**
 - 🔒 **Secure non-custodial trading**
