@@ -8,11 +8,11 @@
 
 ## Get Started
 
-Download the latest release for Mac, Windows and Linux [here](https://github.com/Kava-Labs/switch/releases/latest). Switch is currently only available on testnet.
+Download the latest release for Mac, Windows and Linux [here](https://github.com/Kava-Labs/switch/releases/latest).
 
 In Switch, you can create and load funds onto "cards" to swap between assets. Only you have access to these funds. Thanks to streaming micropayments, even while trading, you retain full asset custody!
 
-Switch supports cards for a few different crypto assets:
+Switch supports cards for a few different crypto assets (**testnet only**):
 - **XRP**, on the [XRP testnet](https://developers.ripple.com/xrp-test-net-faucet.html)
 - **ETH**, using the Kovan Ethereum testnet ([faucet here](https://github.com/kovan-testnet/faucet))
 - **BTC**, using the Lightning Network on the Bitcoin testnet (requires an LND node)
