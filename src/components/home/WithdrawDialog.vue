@@ -10,12 +10,17 @@
         </p>
       </main>
       <footer class="withdraw-dialog__actions">
-        <m-button class="withdraw-dialog__actions__cancel-button" @click="cancelWithdrawal">Cancel</m-button>
+        <m-button
+          class="withdraw-dialog__actions__cancel-button"
+          @click="cancelWithdrawal"
+          >Cancel</m-button
+        >
         <m-button
           class="withdraw-dialog__actions__accept-button"
           raised
           @click="startWithdrawal"
-        >Withdraw</m-button>
+          >Withdraw</m-button
+        >
       </footer>
     </section>
   </section>

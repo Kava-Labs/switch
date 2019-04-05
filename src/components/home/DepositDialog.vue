@@ -10,7 +10,9 @@
         </p>
         <p
           class="deposit-dialog__custody-notice deposit-dialog__custody-notice--bold"
-        >Only you have access to these funds.</p>
+        >
+          Only you have access to these funds.
+        </p>
         <AmountInput
           class="deposit-dialog__amount-input"
           :amount="depositAmount"
@@ -21,12 +23,17 @@
         />
       </main>
       <footer class="deposit-dialog__actions">
-        <m-button class="deposit-dialog__actions__cancel-button" @click="cancelDeposit">Cancel</m-button>
+        <m-button
+          class="deposit-dialog__actions__cancel-button"
+          @click="cancelDeposit"
+          >Cancel</m-button
+        >
         <m-button
           class="deposit-dialog__actions__accept-button"
           raised
           @click="acceptDeposit"
-        >Deposit</m-button>
+          >Deposit</m-button
+        >
       </footer>
     </section>
   </section>
