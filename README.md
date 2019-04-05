@@ -17,7 +17,7 @@ Switch supports cards for a few different crypto assets:
 - **ETH**, using the Kovan Ethereum testnet ([faucet here](https://github.com/kovan-testnet/faucet))
 - **BTC**, using the Lightning Network on the Bitcoin testnet (requires an LND node)
 
-### Non-custodial Trading
+## Non-custodial Trading
 
 When trading between assets, Switch will first send a very small amount of the source asset — the equivalent of $0.05, by default — to the connector. Then, the connector sends some amount of the destination asset. If the connector upholds its side of the bargain and the exchange rate it provides is decent, we repeat the process. And again. And again; many times per second.
 
@@ -27,7 +27,7 @@ If at any point the connector stops sending or sends too little of the destinati
 
 Switch uses Kava as the default connector, but we hope to expand this to user-defined connectors in the near future.
 
-### Roadmp
+## Roadmap
 
 - [ ] Custom connectors
 - [ ] Peer-to-peer payments
