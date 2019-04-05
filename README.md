@@ -4,7 +4,9 @@
 - 🔒 **Secure non-custodial trading**
 - 💸 **Onboarding to layer 2 networks**
 
-[INSERT SCREENSHOT/GIF HERE]
+![Switch home screen](./screenshots/screenshot-home.jpg)
+
+![Switch swap screen](./screenshots/screenshot-swap.jpg)
 
 ## Get Started
 
