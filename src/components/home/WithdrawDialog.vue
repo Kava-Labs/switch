@@ -12,16 +12,14 @@
       <footer class="withdraw-dialog__actions">
         <m-button
           class="withdraw-dialog__actions__cancel-button"
-          :disabled="withdrawalStarted"
           @click="cancelWithdrawal"
           >Cancel</m-button
         >
         <m-button
           class="withdraw-dialog__actions__accept-button"
           raised
-          :disabled="withdrawalStarted"
           @click="startWithdrawal"
-          >Accept</m-button
+          >Withdraw</m-button
         >
       </footer>
     </section>
@@ -30,23 +28,14 @@
 
 <script>
 import Vue from 'vue'
-import Button from 'material-components-vue/dist/button'
 import BigNumber from 'bignumber.js'
 import { convert, usd } from '@kava-labs/crypto-rate-utils'
-
-Vue.use(Button)
 
 export default {
   props: {
     routeInfo: {
       type: Object,
       required: true
-    }
-  },
-  data() {
-    return {
-      withdrawalStarted: false,
-      withdrawalDone: false
     }
   },
   computed: {
@@ -58,38 +47,30 @@ export default {
   },
   methods: {
     async startWithdrawal() {
-      this.withdrawalStarted = true
-
       const uplink = this.uplink.getInternal()
-      this.$store.state.api
+
+      this.uplink.activeWithdrawal = this.$store.state.api
         .withdraw({ uplink })
-        .finally(() => {
-          this.withdrawalDone = true
-          this.cancelWithdrawal()
-        })
         .then(async () => {
           // Remove the uplink
           await this.$store.state.api.remove(this.uplink.getInternal())
           this.$store.commit('REFRESH_UPLINKS')
-
-          // TODO Show success toast
+          this.$store.commit('SHOW_TOAST', 'Successfully withdrew funds')
         })
         .catch(err => {
-          // TODO Show error toast
+          this.$store.commit('SHOW_TOAST', 'Failed to withdraw funds')
         })
+        .finally(() => {
+          this.uplink.activeWithdrawal = null
+        })
+
+      this.cancelWithdrawal()
     },
     cancelWithdrawal() {
-      if (!this.isCancellable) {
-        return
-      }
-
       this.$store.commit('NAVIGATE_TO', {
         name: 'home',
         meta: 'select-source-uplink'
       })
-    },
-    isCancellable() {
-      return !this.withdrawalStarted || this.withdrawalDone
     }
   }
 }
@@ -97,10 +78,6 @@ export default {
 
 <!-- TODO Abstract these styles somewhere else -->
 <style lang="scss">
-$mdc-typography-font-family: 'Rubik';
-$mdc-theme-primary: $secondary;
-@import 'material-components-vue/dist/button/styles';
-
 .withdraw-dialog {
   width: 420px;
   height: 240px;

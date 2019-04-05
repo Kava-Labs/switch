@@ -9,7 +9,8 @@
         />
       </transition>
     </keep-alive>
-    <!-- TODO Add mounting for dialogs/toasts here -->
+    <toast-manager />
+    <portal-target name="dialog" />
   </div>
 </template>
 
@@ -17,6 +18,8 @@
 import NavBar from '@/components/NavBar.vue'
 import Home from '@/components/home/Home.vue'
 import Swap from '@/components/swap/Swap.vue'
+import Spinner from '@/components/Spinner.vue'
+import ToastManager from '@/components/ToastManager.vue'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -24,12 +27,17 @@ export default Vue.extend({
   components: {
     NavBar,
     Home,
-    Swap
+    Swap,
+    Spinner,
+    ToastManager
   },
   computed: {
-    currentRouteComponent(): typeof Swap | typeof Home {
-      /** TODO How to type Vue store? this is `any` */
-      return this.$store.state.route.name === 'swap' ? Swap : Home
+    currentRouteComponent(): typeof Swap | typeof Home | typeof Spinner {
+      return this.$store.state.route.name === 'swap'
+        ? Swap
+        : this.$store.state.route.name === 'home'
+        ? Home
+        : Spinner
     }
   }
 })
@@ -91,4 +99,45 @@ html {
   opacity: 0;
   transform: translateY(30px);
 }
+
+// Add shared text field styling
+
+$mdc-typography-font-family: 'Rubik';
+$mdc-theme-primary: $secondary;
+@import 'material-components-vue/dist/button/styles';
+@import 'material-components-vue/dist/icon-button/styles';
+@import 'material-components-vue/dist/text-field/styles';
+@import 'material-components-vue/dist/snackbar/styles';
+
+.mdc-text-field {
+  @include mdc-text-field-outline-shape-radius(3.175mm);
+  @include mdc-text-field-outline-color($primary-300);
+  @include mdc-text-field-hover-outline-color($primary-800);
+  transition: $transition-color;
+
+  :not(&--focused) {
+    @include mdc-text-field-ink-color($primary-700);
+    @include mdc-text-field-caret-color($primary-700);
+    @include mdc-text-field-label-color($primary-700);
+  }
+
+  &__input {
+    resize: none;
+
+    &::-webkit-scrollbar {
+      width: 0px;
+    }
+  }
+
+  &--focused {
+    // Label and outline change to orange on focus
+    @include mdc-text-field-ink-color($text-black-high-emphasis);
+    @include mdc-text-field-label-color($secondary);
+    @include mdc-text-field-focused-outline-color($secondary);
+  }
+}
+
+// .mdc-button {
+//   @include mdc-button-shape-radius($card-radii);
+// }
 </style>

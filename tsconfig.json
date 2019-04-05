@@ -3,21 +3,17 @@
     "target": "esnext",
     "module": "esnext",
     "strict": true,
-    "importHelpers": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "sourceMap": true,
     "baseUrl": ".",
     "types": ["webpack-env"],
-    "noImplicitAny": true,
-    // TODO Why is this necessary (ostensibly)?
-    "skipLibCheck": true,
     "paths": {
       "@/*": ["src/*"]
     },
     "lib": ["esnext", "dom"],
+    "skipLibCheck": true, // TODO Remove this!
     "pretty": true,
     "outDir": "dist_electron"
-  },
-  "include": ["types/**/*.d.ts", "src/**/*.ts", "src/**/*.vue"]
+  }
 }

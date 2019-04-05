@@ -1,23 +1,12 @@
-import {
-  AssetUnit,
-  eth,
-  xrp,
-  btc,
-  usd,
-  convert
-} from '@kava-labs/crypto-rate-utils'
+import { AssetUnit } from '@kava-labs/crypto-rate-utils'
 import {
   connect,
-  SettlementEngineType,
   SwitchApi,
   LedgerEnv,
   ReadyUplinks
 } from '@kava-labs/switch-api'
 import BigNumber from 'bignumber.js'
 import { createHmac } from 'crypto'
-import { unlink, stat } from 'fs'
-import { homedir } from 'os'
-import { promisify } from 'util'
 import Vue from 'vue'
 import Vuex from 'vuex'
 import { BehaviorSubject } from 'rxjs'
@@ -37,7 +26,8 @@ export interface Uplink {
   balance$: BehaviorSubject<BigNumber>
   incomingCapacity$: BehaviorSubject<BigNumber>
   outgoingCapacity$: BehaviorSubject<BigNumber>
-  // TODO Add `isDepositing` with Promise that resolves/fails with the deposit?
+  activeDeposit: null | Promise<void>
+  activeWithdrawal: null | Promise<void>
   canDeposit: boolean
   canWithdraw: boolean
   getInternal: () => ReadyUplinks
@@ -47,13 +37,17 @@ export interface Uplink {
  * ROUTES
  */
 
-type Route = HomeRoute | SwapRoute
+type Route = HomeRoute | SwapRoute | LoadingSpinner
 
 export interface SwapRoute {
   name: 'swap'
   sourceUplink: string
   destinationUplink: string
   isStreaming: boolean
+}
+
+export interface LoadingSpinner {
+  name: 'loading'
 }
 
 export type HomeRoute = {
@@ -81,33 +75,48 @@ export type MetaRoute =
       meta: 'withdrawal'
       id: string
     }
+  /** Config dialog */
+  | {
+      meta: 'config'
+    }
 
 export interface State {
+  showWelcome: boolean
+  route: Route
   api?: Readonly<SwitchApi>
   uplinks: Uplink[]
-  route: Route
+  toasts: {
+    key: string
+    message: string
+  }[]
 }
+
+export const generateUplinkId = (uplink: ReadyUplinks) =>
+  hmac(uplink.settlerType, uplink.credentialId)
 
 export default new Vuex.Store<State>({
   state: {
+    showWelcome: false,
     route: {
-      name: 'home',
-      meta: 'select-source-uplink'
+      name: 'loading'
     },
-    uplinks: []
+    uplinks: [],
+    toasts: []
   },
   mutations: {
     SETUP_API(state, api: SwitchApi) {
       state.api = api
     },
-    REFRESH_UPLINKS(state) {
+    REFRESH_UPLINKS(state, initialLoad = false) {
       if (!state.api) {
         return
       }
 
       state.uplinks = state.api.state.uplinks.map(uplink => {
-        const id = hmac(uplink.settlerType, uplink.credentialId)
+        const id = generateUplinkId(uplink)
         const settler = state.api!.state.settlers[uplink.settlerType]
+
+        const existingUplink = state.uplinks.find(uplink => uplink.id === id)
 
         return {
           id,
@@ -117,71 +126,95 @@ export default new Vuex.Store<State>({
           incomingCapacity$: uplink.incomingCapacity$,
           outgoingCapacity$: uplink.outgoingCapacity$,
           getInternal: () => uplink,
+          activeDeposit: existingUplink ? existingUplink.activeDeposit : null,
+          activeWithdrawal: existingUplink
+            ? existingUplink.activeWithdrawal
+            : null,
           canDeposit: ['ETH', 'XRP'].includes(settler.assetCode),
           canWithdraw: ['ETH', 'XRP'].includes(settler.assetCode)
         }
       })
+
+      const noUplinks = state.uplinks.length === 0
+
+      // If initial load, show welcome; otherwise, hide it
+      state.showWelcome = noUplinks && initialLoad
+
+      // Show config dialog if no uplinks are configured
+      state.route = noUplinks
+        ? {
+            name: 'home',
+            meta: 'config'
+          }
+        : (state.route = {
+            name: 'home',
+            meta: 'select-source-uplink'
+          })
     },
     NAVIGATE_TO(state, route: Route) {
+      // Prevent deposits and withdrawals to card already depositing
+      if (route.name === 'home' && route.meta === 'deposit') {
+        const uplink = state.uplinks.find(
+          someUplink => someUplink.id === route.id
+        )
+        if (uplink && (uplink.activeDeposit || uplink.activeWithdrawal)) {
+          return
+        }
+      }
+
+      // Prevent deposits and withdrawals to card already withdrawing
+      if (route.name === 'home' && route.meta === 'withdrawal') {
+        const uplink = state.uplinks.find(
+          someUplink => someUplink.id === route.id
+        )
+        if (uplink && (uplink.activeDeposit || uplink.activeWithdrawal)) {
+          return
+        }
+      }
+
+      // Prevent swaps with card withdrawing
+      if (route.name === 'swap') {
+        const sourceUplink = state.uplinks.find(
+          someUplink => someUplink.id === route.sourceUplink
+        )
+        if (sourceUplink && sourceUplink.activeWithdrawal) {
+          return
+        }
+
+        const destUplink = state.uplinks.find(
+          someUplink => someUplink.id === route.destinationUplink
+        )
+        if (destUplink && destUplink.activeWithdrawal) {
+          return
+        }
+      }
+
       state.route = route
+    },
+    SHOW_TOAST(state, message: string) {
+      const key = Math.random().toString()
+      state.toasts.push({
+        key,
+        message
+      })
+
+      setTimeout(() => {
+        state.toasts = state.toasts.filter(toast => toast.key !== key)
+      }, 5000)
+    },
+    HIDE_TOAST(state, keyToRemove: string) {
+      state.toasts = state.toasts.filter(({ key }) => key !== keyToRemove)
     }
   },
   actions: {
     async loadApi({ commit }) {
-      /** TODO (remove in production) Delete any existing config */
-      const configPath = `${homedir()}/.switch/config.json`
-      await promisify(unlink)(configPath).catch(() => Promise.resolve())
-
       const api = await connect(LedgerEnv.Testnet)
 
-      /** TODO (remove in production) Temp: Add BTC, ETH & XRP uplinks */
-
-      // const ethDepositAmount = convert(usd(8), eth(), api.state.rateBackend).decimalPlaces(
-      //   9
-      // )
-      const loadingEth = api.add({
-        settlerType: SettlementEngineType.Machinomy,
-        privateKey: process.env.ETH_PRIVATE_KEY_CLIENT_1!
-      })
-      // .then(uplink =>
-      //   api.deposit({
-      //     uplink,
-      //     amount: ethDepositAmount
-      //   })
-      // )
-
-      // const xrpDepositAmount = convert(usd(8), xrp(), api.state.rateBackend).decimalPlaces(
-      //   6
-      // )
-      const loadingXrp = api.add({
-        settlerType: SettlementEngineType.XrpPaychan,
-        secret: process.env.XRP_SECRET_CLIENT_1!
-      })
-      // .then(uplink =>
-      //   api.deposit({
-      //     uplink,
-      //     amount: xrpDepositAmount
-      //   })
-      // )
-
-      const loadingBtc = api.add({
-        settlerType: SettlementEngineType.Lnd,
-        hostname: process.env.LIGHTNING_LND_HOST_CLIENT_1!,
-        tlsCert: process.env.LIGHTNING_TLS_CERT_PATH_CLIENT_1!,
-        macaroon: process.env.LIGHTNING_MACAROON_PATH_CLIENT_1!,
-        grpcPort: parseInt(process.env.LIGHTNING_LND_GRPCPORT_CLIENT_1!, 10)
-      })
-
-      await Promise.all([loadingEth, loadingXrp, loadingBtc])
-
       commit('SETUP_API', Object.freeze(api!))
-      commit('REFRESH_UPLINKS')
+      commit('REFRESH_UPLINKS', true)
     }
   },
   getters: {
-    isLoaded(state) {
-      return !!state.api
-    },
     rateApi(state) {
       return state.api!.state.rateBackend
     }

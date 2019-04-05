@@ -55,28 +55,24 @@
     />
     <transition name="fade" mode="out-in" appear>
       <div v-if="!routeInfo.isStreaming" class="swap__actions">
-        <button
-          ref="mdc-go-button"
-          class="swap__actions__go-button mdc-button mdc-button--outlined"
+        <m-button
+          class="swap__actions__go-button"
+          outlined
           @click="startStream"
         >
-          <span class="mdc-button__label">Go</span>
-          <svg class="mdc-button__icon" viewBox="0 0 24 24">
+          <span>Go</span>
+          <svg slot="icon" viewBox="0 0 24 24">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
-        </button>
-        <button
-          ref="mdc-flip-button"
-          class="swap__actions__flip-button mdc-button"
-          @click="flipUplinks"
-        >
-          <span class="mdc-button__label">Flip</span>
-          <svg class="mdc-button__icon" viewBox="0 0 24 24">
+        </m-button>
+        <m-button class="swap__actions__flip-button" flat @click="flipUplinks">
+          <span>Flip</span>
+          <svg slot="icon" viewBox="0 0 24 24">
             <path d="M17 2.1l4 4-4 4"></path>
             <path d="M3 12.2v-2a4 4 0 0 1 4-4h12.8M7 21.9l-4-4 4-4"></path>
             <path d="M21 11.8v2a4 4 0 0 1-4 4H4.2"></path>
           </svg>
-        </button>
+        </m-button>
       </div>
     </transition>
   </div>
@@ -86,9 +82,8 @@
 import UplinkCard from '@/components/card/UplinkCard.vue'
 import AmountInput from './AmountInput.vue'
 import BigNumber from 'bignumber.js'
-import { convert, usd, connectCoinCap } from '@kava-labs/crypto-rate-utils'
+import { convert, usd } from '@kava-labs/crypto-rate-utils'
 import { Uplink } from '@/store'
-import { MDCRipple } from '@material/ripple'
 import Vue from 'vue'
 import { from } from 'rxjs'
 import { pairwise, filter, takeUntil } from 'rxjs/operators'
@@ -156,18 +151,12 @@ export default {
   // When capacity changes, update the amount of available capacity
   watch: {
     sourceOutgoingCapacity() {
-      this.handleSourceAmountInput(this.sourceAmount)
+      this.handleSourceAmountInput(this.sourceAmount, false)
     },
     destinationIncomingCapacity() {
-      this.handleSourceAmountInput(this.sourceAmount)
+      this.handleSourceAmountInput(this.sourceAmount, false)
     }
   },
-  mounted() {
-    this.initButtons()
-  },
-  // updated() {
-  //   this.initButtons()
-  // },
   methods: {
     flipUplinks() {
       if (this.routeInfo.isStreaming) {
@@ -208,6 +197,12 @@ export default {
           amount: new BigNumber(this.sourceAmount),
           source: this.sourceUplink.getInternal(),
           dest: this.destinationUplink.getInternal()
+        })
+        .then(() => {
+          this.$store.commit('SHOW_TOAST', `Swap succeeded &ensp; &#127881;`)
+        })
+        .catch(err => {
+          this.$store.commit('SHOW_TOAST', 'Swap failed')
         })
         .finally(() => {
           this.$store.commit('NAVIGATE_TO', {
@@ -265,14 +260,8 @@ export default {
     toggleMoneyIn(index) {
       Vue.set(this.activeMoneyIn, index, false)
     },
-    // TODO Replace this with material-components-vue to prevent some errors in logs
-    // TODO Don't do this on update! probs super slooww!
-    initButtons() {
-      new MDCRipple(this.$refs['mdc-go-button'])
-      new MDCRipple(this.$refs['mdc-flip-button'])
-    },
     // TODO Abstract some of this code !
-    handleSourceAmountInput(input) {
+    handleSourceAmountInput(input, showToast = true) {
       if (this.routeInfo.isStreaming) {
         this.sourceAmount = this.sourceAmount
         return
@@ -299,6 +288,10 @@ export default {
         this.$store.getters.rateApi
       )
 
+      let showTradeLimitToast = false
+      let showIncomingCapacityToast = false
+      let showOutgoingCapacityToast = false
+
       let destAmount = convert(
         this.sourceUnit(sourceAmount),
         this.destinationUnit(),
@@ -309,6 +302,8 @@ export default {
       // Calculate the max destination amount and reduce all values
       const maxDestAmount = this.destinationUplink.incomingCapacity$.value
       if (destAmount.isGreaterThan(maxDestAmount)) {
+        showIncomingCapacityToast = true
+
         destAmount = maxDestAmount
         sourceAmount = convert(
           this.destinationUnit(destAmount),
@@ -326,12 +321,29 @@ export default {
       )
       const maxSourceAmount = BigNumber.min(outgoingCapacity, tradeLimit)
       if (sourceAmount.isGreaterThan(maxSourceAmount)) {
+        showOutgoingCapacityToast = sourceAmount.isGreaterThan(outgoingCapacity)
+        showTradeLimitToast = sourceAmount.isGreaterThan(tradeLimit)
+
         sourceAmount = maxSourceAmount
         destAmount = convert(
           this.sourceUnit(sourceAmount),
           this.destinationUnit(),
           exchangeRate
         )
+      }
+
+      // Show relevant toasts
+      if (showToast) {
+        if (showTradeLimitToast) {
+          this.$store.commit('SHOW_TOAST', 'Maximum swap amount is $10')
+        } else if (showOutgoingCapacityToast) {
+          this.$store.commit(
+            'SHOW_TOAST',
+            'Deposit to sending card to increase swap limit'
+          )
+        } else if (showIncomingCapacityToast) {
+          this.$store.commit('SHOW_TOAST', 'Swap amount limited by connector')
+        }
       }
 
       // Take slippage margin out of the destination amount
@@ -393,9 +405,15 @@ export default {
         reverseExchangeRate
       )
 
+      let showTradeLimitToast = false
+      let showIncomingCapacityToast = false
+      let showOutgoingCapacityToast = false
+
       // Calculate the max destination amount and reduce all values
       const maxDestAmount = this.destinationUplink.incomingCapacity$.value
       if (destAmount.isGreaterThan(maxDestAmount)) {
+        showIncomingCapacityToast = true
+
         destAmount = maxDestAmount
         sourceAmount = convert(
           this.destinationUnit(destAmount),
@@ -417,12 +435,29 @@ export default {
         sourceAmount.dividedBy(MAX_SLIPPAGE)
       )
       if (sourceAmount.isGreaterThan(maxSourceAmount)) {
+        showOutgoingCapacityToast = sourceAmount.isGreaterThan(outgoingCapacity)
+        showTradeLimitToast = sourceAmount.isGreaterThan(tradeLimit)
+
         sourceAmount = maxSourceAmount
         destAmount = convert(
           this.sourceUnit(sourceAmount),
           this.destinationUnit(),
           exchangeRate
         )
+      }
+
+      // Show relevant toasts
+      if (showToast) {
+        if (showTradeLimitToast) {
+          this.$store.commit('SHOW_TOAST', 'Maximum swap amount is $10')
+        } else if (showOutgoingCapacityToast) {
+          this.$store.commit(
+            'SHOW_TOAST',
+            'Deposit to sending card to increase swap limit'
+          )
+        } else if (showIncomingCapacityToast) {
+          this.$store.commit('SHOW_TOAST', 'Swap amount limited by connector')
+        }
       }
 
       // Truncate the amounts
@@ -451,10 +486,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-$mdc-theme-primary: $secondary;
-$mdc-typography-font-family: 'Rubik';
-@import '@material/button/mdc-button';
-
 .swap {
   max-width: $content-max-width;
   margin: 20px auto;
@@ -494,7 +525,7 @@ $mdc-typography-font-family: 'Rubik';
     grid-area: connector;
     align-self: center;
     justify-self: center;
-    filter: drop-shadow(0 10px 20px rgba(40, 51, 75, 0.45));
+    filter: drop-shadow(0 0 8px rgba(40, 51, 75, 0.35));
     user-select: none;
     -webkit-user-drag: none;
     position: relative;
@@ -506,14 +537,16 @@ $mdc-typography-font-family: 'Rubik';
       @keyframes spin {
         from {
           transform: rotate(0deg);
+          // filter: rotate(0deg);
         }
 
         to {
           transform: rotate(360deg);
+          // filter: rotate(360deg);
         }
       }
 
-      animation: spin 200ms infinite forwards;
+      animation: spin 500ms linear infinite forwards;
     }
   }
 
@@ -592,29 +625,21 @@ $mdc-typography-font-family: 'Rubik';
     flex-flow: column nowrap;
     align-items: center;
 
-    &__go-button,
-    &__flip-button {
-      @include mdc-button-shape-radius($card-radii);
-    }
+    // TODO Improve these styles!
+    // TODO Change Material "theme" using SVG mixins!
 
-    // TODO Fix these styles!
     &__go-button {
       width: 110px;
       height: 56px;
       font-size: 14pt;
-      // @include mdc-button-filled-accessible($secondary);
+      border-radius: $card-radii;
     }
-
-    // TODO TODO TODO Change Material "theme" using SVG mixins!
 
     &__flip-button {
       width: 110px;
       height: 42px;
       margin-top: 10px;
-
-      .mdc-button__label {
-        color: $primary-400;
-      }
+      color: $primary-400 !important;
 
       .mdc-button__icon {
         fill: none;

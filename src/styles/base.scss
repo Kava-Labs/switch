@@ -2,6 +2,12 @@
 
 $content-max-width: 1000px;
 
+// Easing (from https://material.io/design/motion/speed.html#easing)
+
+$easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+$easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
+$easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
+
 // Colors
 
 $light: white;
@@ -43,6 +49,15 @@ $secondary-800: #d72825;
 $secondary-900: #c81c18;
 
 // Typography
+
+.a {
+  text-decoration: none;
+  color: $secondary;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
 
 .h1,
 .h2,
@@ -145,19 +160,13 @@ $secondary-900: #c81c18;
   line-height: 16px;
 }
 
-// Transitions (from https://material.io/design/motion/speed.html#easing)
-
-$easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
-$easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
-$easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
-
 // Shared UI elements
 
 $card-width: 85.6mm;
 $card-height: 54mm;
 $card-radii: 3.175mm;
 $card-inner-padding: 22px;
-$card-shadow: 0 10px 20px rgba(40, 51, 75, 0.45);
+$card-shadow: 0 6px 16px rgba(40, 51, 75, 0.45);
 
 %asset-code {
   font-weight: 500;
@@ -167,7 +176,8 @@ $card-shadow: 0 10px 20px rgba(40, 51, 75, 0.45);
   color: $text-black-high-emphasis;
 }
 
-$transition-color: 200ms color $easing-standard;
+$transition-color: color 200ms $easing-standard;
+
 %reported-amount {
   color: $primary-600;
   font-size: 14pt;

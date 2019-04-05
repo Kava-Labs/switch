@@ -1,25 +1,14 @@
 <template>
   <div class="amount-input">
-    <div ref="mdc-text-field" class="mdc-text-field mdc-text-field--outlined">
-      <input
-        id="tf-outlined"
-        ref="text-input"
-        class="mdc-text-field__input"
-        type="text"
-        :value="amount"
-        @input.stop="emitInput"
-      />
+    <m-text-field
+      :focused="focused"
+      :value="amount"
+      outlined
+      @model="emitInput"
+    >
       <div class="amount-input__asset-code">{{ assetCode }}</div>
-      <div class="mdc-notched-outline">
-        <div class="mdc-notched-outline__leading"></div>
-        <div v-if="label" class="mdc-notched-outline__notch">
-          <label for="tf-outlined" class="mdc-floating-label">{{
-            label
-          }}</label>
-        </div>
-        <div class="mdc-notched-outline__trailing"></div>
-      </div>
-    </div>
+      <m-floating-label v-if="label">{{ label }}</m-floating-label>
+    </m-text-field>
     <div v-if="amountUsd" class="amount-input__reported-amount">
       {{ amountUsd }}
     </div>
@@ -27,8 +16,6 @@
 </template>
 
 <script>
-import { MDCTextField } from '@material/textfield'
-
 export default {
   props: {
     label: {
@@ -52,28 +39,14 @@ export default {
       type: Boolean
     }
   },
-
-  /**
-   * TODO Should this be replaced with the text field from material-components-vue? Looks pretty good!
-   * (I'm also implementing some of this wrong; .destroy() on component should be called when removed from DOM)
-   */
-
   mounted() {
-    this.initTextField()
-
     if (this.focused) {
-      this.$refs['text-input'].focus()
+      this.$el.querySelector('.mdc-text-field__input').focus()
     }
   },
-  updated() {
-    this.initTextField()
-  },
   methods: {
-    initTextField() {
-      new MDCTextField(this.$refs['mdc-text-field'])
-    },
-    emitInput(event) {
-      this.$emit('input', event.target.value)
+    emitInput(value) {
+      this.$emit('input', value)
 
       // Reset the state of the text field to the value of the prop,
       // so the data flow is unidirectional
@@ -84,20 +57,18 @@ export default {
 </script>
 
 <style lang="scss">
-$mdc-typography-font-family: 'Rubik';
-@import '~@material/textfield/mdc-text-field';
-
 .amount-input {
   display: flex;
   flex-flow: column nowrap;
+  position: relative;
 
   &__asset-code {
     @extend %asset-code;
     color: $primary-700;
     align-self: center;
     position: absolute;
-    right: 15px;
-    margin-top: -1px;
+    right: 17px;
+    top: 17px;
     transition: $transition-color;
   }
 
@@ -106,39 +77,23 @@ $mdc-typography-font-family: 'Rubik';
     margin: 10px 0 0 17px;
     grid-area: reported-amount;
   }
-}
 
-.mdc-text-field {
-  @include mdc-text-field-outline-shape-radius(3.175mm);
-  @include mdc-text-field-outline-color($primary-300);
-  @include mdc-text-field-hover-outline-color($primary-800);
-  transition: $transition-color;
-
-  :not(&--focused) {
-    @include mdc-text-field-ink-color($primary-700);
-    @include mdc-text-field-caret-color($primary-700);
-    @include mdc-text-field-label-color($primary-700);
-  }
-
-  &--focused {
-    // Label and outline change to orange on focus
-    @include mdc-text-field-ink-color($text-black-high-emphasis);
-    @include mdc-text-field-label-color($secondary);
-    @include mdc-text-field-focused-outline-color($secondary);
-
-    .amount-input__asset-code,
-    + .amount-input__reported-amount {
-      color: $text-black-high-emphasis;
+  .mdc-text-field {
+    &__input {
+      font-size: 18pt;
+      font-weight: 300;
+      letter-spacing: 0.1ch;
+      font-variant-numeric: tabular-nums;
+      // Appears material-ui adds this, but override it to stay consistent with cards?
+      -webkit-font-smoothing: auto;
     }
-  }
 
-  &__input {
-    font-size: 18pt;
-    font-weight: 300;
-    letter-spacing: 0.1ch;
-    font-variant-numeric: tabular-nums;
-    // Appears material-ui adds this, but override it to stay consistent with cards?
-    -webkit-font-smoothing: auto;
+    &--focused {
+      .amount-input__asset-code,
+      + .amount-input__reported-amount {
+        color: $text-black-high-emphasis;
+      }
+    }
   }
 }
 </style>

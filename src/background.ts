@@ -4,16 +4,19 @@ import {
   installVueDevtools
 } from 'vue-cli-plugin-electron-builder/lib'
 import path from 'path'
+import MenuBuilder from './menu'
+import ipc from 'electron-better-ipc'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win: BrowserWindow | null
+let winClosing = false
 
 // Standard scheme must be registered before the app is ready
 protocol.registerStandardSchemes(['app'], { secure: true })
+
 function createWindow() {
-  // Create the browser window.
   win = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -25,12 +28,10 @@ function createWindow() {
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
-    // Load the url of the dev server if in development mode
     win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
     if (!process.env.IS_TEST) win.webContents.openDevTools()
   } else {
     createProtocol('app')
-    // Load the index.html when not in development
     win.loadURL('app://./index.html')
   }
 
@@ -40,10 +41,27 @@ function createWindow() {
     }
   })
 
-  win.on('closed', () => {
-    win = null
+  win.on('close', (event: Event) => {
+    if (win && !winClosing) {
+      event.preventDefault()
+      winClosing = true
+
+      ipc.callRenderer(win, 'before-window-close').finally(() => {
+        if (win) {
+          win.close()
+
+          win = null
+          winClosing = false
+        }
+      })
+    }
   })
+
+  const menuBuilder = new MenuBuilder(win)
+  menuBuilder.buildMenu()
 }
+
+app.on('before-quit', () => {})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -74,6 +92,7 @@ app.on('ready', async () => {
       console.error('Vue Devtools failed to install:', e.toString())
     }
   }
+
   createWindow()
 })
 

@@ -32,9 +32,9 @@ module.exports = {
     plugins: [
       new webpack.EnvironmentPlugin({
         // TODO Disable both of these in production!
-        // DEBUG: '"ilp*,switch*"',
+        // DEBUG: '"ilp*,switch*"'
         // Load vars from envkey
-        ...fetch()
+        // ...fetch()
       })
     ]
   },

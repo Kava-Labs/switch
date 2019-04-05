@@ -1,5 +1,5 @@
 <template>
-  <div class="add-card">
+  <div class="add-card" @click="configNewUplink">
     <UplinkCardButton type="add" label="Add Card" />
   </div>
 </template>
@@ -10,6 +10,14 @@ import UplinkCardButton from './UplinkCardButton.vue'
 export default {
   components: {
     UplinkCardButton
+  },
+  methods: {
+    configNewUplink() {
+      this.$store.commit('NAVIGATE_TO', {
+        name: 'home',
+        meta: 'config'
+      })
+    }
   }
 }
 </script>

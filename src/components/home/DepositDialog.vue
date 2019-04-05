@@ -5,29 +5,34 @@
       <header class="deposit-dialog__header">Deposit</header>
       <main>
         <p class="deposit-dialog__custody-notice">
-          Funds will be kept securely in your custody.
+          Deposit funds onto your card to enable swapping and instant streaming
+          payments.
+        </p>
+        <p
+          class="deposit-dialog__custody-notice deposit-dialog__custody-notice--bold"
+        >
+          Only you have access to these funds.
         </p>
         <AmountInput
+          class="deposit-dialog__amount-input"
           :amount="depositAmount"
           :amount-usd="helperText"
           :asset-code="uplink.unit().symbol"
           :focused="true"
-          @input="updateInputAmount"
+          @input="handleDepositAmountInput"
         />
       </main>
       <footer class="deposit-dialog__actions">
         <m-button
           class="deposit-dialog__actions__cancel-button"
-          :disabled="pendingDeposit"
           @click="cancelDeposit"
           >Cancel</m-button
         >
         <m-button
           class="deposit-dialog__actions__accept-button"
           raised
-          :disabled="pendingDeposit"
           @click="acceptDeposit"
-          >Accept</m-button
+          >Deposit</m-button
         >
       </footer>
     </section>
@@ -36,12 +41,9 @@
 
 <script>
 import Vue from 'vue'
-import Button from 'material-components-vue/dist/button'
 import BigNumber from 'bignumber.js'
 import AmountInput from '@/components/swap/AmountInput.vue'
 import { convert, usd } from '@kava-labs/crypto-rate-utils'
-
-Vue.use(Button)
 
 const MAX_DEPOSIT_AMOUNT = usd(10)
 
@@ -55,8 +57,7 @@ export default {
   },
   data() {
     return {
-      pendingDeposit: null,
-      inputAmount: ''
+      depositAmount: null
     }
   },
   computed: {
@@ -79,16 +80,18 @@ export default {
       ).toFixed(2, BigNumber.ROUND_CEIL)
 
       return '$' + usdAmount
-    },
-    depositAmount() {
+    }
+  },
+  methods: {
+    handleDepositAmountInput(input) {
       // Allow the fields to be cleared
-      if (this.inputAmount.length === 0) {
+      if (input.length === 0) {
         return null
       }
 
       // Ensure correct formatting & positive
       // Prepend "0" to input so BigNumber parses "." as valid
-      let parsedInput = new BigNumber('0' + this.inputAmount)
+      let parsedInput = new BigNumber('0' + input)
       if (parsedInput.isNaN() || parsedInput.isLessThan(0)) {
         return
       }
@@ -102,6 +105,7 @@ export default {
         this.$store.getters.rateApi
       )
       if (depositAmount.isGreaterThan(maxDeposit)) {
+        this.$store.commit('SHOW_TOAST', 'Maximum deposit is $10')
         depositAmount = maxDeposit
       }
 
@@ -113,39 +117,33 @@ export default {
       )
 
       // *Only* update the source amount if we changed it (otherwise use the existing text)
-      return depositAmount.isEqualTo(parsedInput)
-        ? this.inputAmount
+      this.depositAmount = depositAmount.isEqualTo(parsedInput)
+        ? input
         : depositAmount.toString()
-    }
-  },
-  methods: {
-    async updateInputAmount(amount) {
-      this.inputAmount = amount
     },
     acceptDeposit() {
       if (new BigNumber(this.depositAmount).isZero()) {
         return
       }
 
-      if (this.pendingDeposit) {
-        return
-      }
+      this.uplink.activeDeposit = this.$store.state.api
+        .deposit({
+          uplink: this.uplink.getInternal(),
+          amount: new BigNumber(this.depositAmount)
+        })
+        .then(() => {
+          this.$store.commit('SHOW_TOAST', 'Successfully deposited funds')
+        })
+        .catch(err => {
+          this.$store.commit('SHOW_TOAST', 'Failed to deposit')
+        })
+        .finally(() => {
+          this.uplink.activeDeposit = null
+        })
 
-      this.pendingDeposit = this.$store.state.api.deposit({
-        uplink: this.uplink.getInternal(),
-        amount: new BigNumber(this.depositAmount)
-      })
-
-      this.pendingDeposit.then(() => {
-        this.pendingDeposit = null
-        this.cancelDeposit()
-      })
+      this.cancelDeposit()
     },
     cancelDeposit() {
-      if (this.pendingDeposit) {
-        return
-      }
-
       this.$store.commit('NAVIGATE_TO', {
         name: 'home',
         meta: 'select-source-uplink'
@@ -156,19 +154,15 @@ export default {
 </script>
 
 <style lang="scss">
-$mdc-typography-font-family: 'Rubik';
-$mdc-theme-primary: $secondary;
-@import 'material-components-vue/dist/button/styles';
-
 .deposit-dialog {
   width: 420px;
-  height: 340px;
+  height: 360px;
   padding: 40px;
   box-sizing: border-box;
   position: absolute;
   z-index: 20;
   left: calc((100% - 420px) / 2);
-  top: calc((100% - 340px) / 2);
+  top: calc((100% - 360px) / 2);
   background: white;
   border-radius: $card-radii;
   transform: scale(1);
@@ -201,8 +195,16 @@ $mdc-theme-primary: $secondary;
   }
 
   &__custody-notice {
-    margin: 0 0 30px 0;
+    margin: 0 0 10px 0;
     color: $text-black-medium-emphasis;
+
+    &--bold {
+      font-weight: 500;
+    }
+  }
+
+  &__amount-input {
+    margin: 20px 0 0 0;
   }
 }
 
@@ -215,5 +217,6 @@ $mdc-theme-primary: $secondary;
   z-index: 15;
   background: black;
   opacity: 0.5;
+  transform: translateY(0) !important;
 }
 </style>

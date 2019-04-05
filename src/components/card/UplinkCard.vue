@@ -20,6 +20,12 @@
           </div>
         </div>
         <img class="card__front__connector-icon" src="@/assets/kava-logo.svg" />
+        <transition name="fade" mode="out-in" appear>
+          <div
+            v-if="uplink.activeDeposit || uplink.activeWithdrawal"
+            class="card__front__spinner"
+          />
+        </transition>
       </div>
       <div class="card__back" @click="showFront">
         <div class="card__back__stripe" />
@@ -54,7 +60,7 @@
 </template>
 
 <script lang="ts">
-import UplinkCardButton from './UplinkCardButton.vue'
+import UplinkCardButton from '@/components/card/UplinkCardButton.vue'
 import BigNumber from 'bignumber.js'
 import { mapGetters } from 'vuex'
 import Vue from 'vue'
@@ -69,17 +75,13 @@ export default Vue.extend({
       required: true
     },
 
-    /** TODO Add an explanation of what these states actually mean
-     * in terms of source asset has been selected, dest asset selected, etc. etc.
-     */
-
     /** Can this card be flipped on hover or be selected? */
     display: {
       type: String as () =>
-        | 'normal' // Card has actions, can be flipped & selected
-        | 'selected' // No actions or flip; light opacity to show selected
-        | 'selectable' // No actions or flip; hover response to show it can be selected
-        | 'static', // No actions, flip, hover or selection
+        | 'normal' // Card has actions, can be flipped & selected as source asset (default)
+        | 'selected' // Card has been selected as the sending/source asset (selection state)
+        | 'selectable' // Card can be selected as destination/receiving asset (selection state)
+        | 'static', // Card has no actions nor hover (swap screen)
       default: 'normal'
     }
   },
@@ -246,6 +248,29 @@ export default Vue.extend({
       bottom: $card-inner-padding;
       user-select: none;
       -webkit-user-drag: none;
+    }
+
+    &__spinner {
+      width: 40px;
+      height: 40px;
+      box-sizing: border-box;
+      border-radius: 50%;
+      border: 6px solid $secondary-100;
+      border-left: 6px solid $secondary;
+      animation: spin 600ms linear infinite;
+      position: absolute;
+      right: $card-inner-padding;
+      bottom: $card-inner-padding * 3;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
     }
   }
 

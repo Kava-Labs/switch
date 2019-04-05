@@ -12,6 +12,7 @@
         </div>
       </transition>
       <img class="header__nav__logo" src="@/assets/switch-logo.svg" />
+      <div class="header__nav__testnet-badge">Testnet</div>
     </nav>
     <transition name="fly-in" mode="out-in">
       <nav v-if="showSelectDestBar" class="header__select-bar">
@@ -31,13 +32,6 @@
 </template>
 
 <script>
-import Vue from 'vue'
-import Button from 'material-components-vue/dist/button'
-import IconButton from 'material-components-vue/dist/icon-button'
-
-Vue.use(Button)
-Vue.use(IconButton)
-
 export default {
   computed: {
     showSelectDestBar() {
@@ -68,10 +62,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+// TODO Find a better solution
 $mdc-typography-font-family: 'Rubik';
 $mdc-theme-primary: white;
 @import 'material-components-vue/dist/button/styles';
-@import 'material-components-vue/dist/icon-button/styles';
 
 .header {
   display: flex;
@@ -106,8 +100,22 @@ $mdc-theme-primary: white;
 
     &__logo {
       height: 30px;
+      position: absolute;
       user-select: none;
       -webkit-user-drag: none;
+    }
+
+    &__testnet-badge {
+      position: relative;
+      padding: 4px 7px;
+      left: 130px;
+      border: 2px solid $secondary;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      font-size: 10pt;
+      font-weight: 700;
+      color: $secondary;
     }
   }
 
@@ -117,7 +125,7 @@ $mdc-theme-primary: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #2d3142; // TODO Change to primary
+    background: $primary;
     color: white;
     position: fixed;
     top: 0;

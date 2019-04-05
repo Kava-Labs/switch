@@ -12,9 +12,11 @@
         <add-uplink-card />
       </div>
     </transition-group>
-    <transition name="prompt" mode="out-in">
-      <component :is="metaRoute" :route-info="routeInfo" />
-    </transition>
+    <portal to="dialog">
+      <transition name="prompt" mode="out-in" appear>
+        <component :is="metaRoute" :route-info="routeInfo" />
+      </transition>
+    </portal>
   </section>
 </template>
 
@@ -26,6 +28,7 @@ import Vue from 'vue'
 import { Uplink, HomeRoute } from '@/store'
 import DepositDialog from '@/components/home/DepositDialog.vue'
 import WithdrawDialog from '@/components/home/WithdrawDialog.vue'
+import ConfigDialog from '@/components/home/ConfigDialog.vue'
 
 export default Vue.extend({
   components: {
@@ -62,11 +65,17 @@ export default Vue.extend({
         {}
       )
     },
-    metaRoute(): typeof DepositDialog | typeof WithdrawDialog | null {
+    metaRoute():
+      | typeof DepositDialog
+      | typeof WithdrawDialog
+      | typeof ConfigDialog
+      | null {
       return this.routeInfo.meta === 'deposit'
         ? DepositDialog
         : this.routeInfo.meta === 'withdrawal'
         ? WithdrawDialog
+        : this.routeInfo.meta === 'config'
+        ? ConfigDialog
         : null
     }
   },
@@ -108,6 +117,8 @@ export default Vue.extend({
   height: $card-height;
   position: relative;
 }
+
+// TODO Move all of the list transition to base.scss?
 
 .list-move {
   transition: transform 300ms $easing-standard;
