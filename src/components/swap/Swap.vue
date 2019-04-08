@@ -18,7 +18,7 @@
       class="swap__interledger-logo"
       :class="{ 'swap__interledger-logo--spin': routeInfo.isStreaming }"
       src="~@/assets/interledger-logo.svg"
-    />
+    >
     <div class="swap__source-pipe">
       <div
         v-for="(isActive, index) in activeMoneyOut"
@@ -55,11 +55,7 @@
     />
     <transition name="fade" mode="out-in" appear>
       <div v-if="!routeInfo.isStreaming" class="swap__actions">
-        <m-button
-          class="swap__actions__go-button"
-          outlined
-          @click="startStream"
-        >
+        <m-button class="swap__actions__go-button" outlined @click="startStream">
           <span>Go</span>
           <svg slot="icon" viewBox="0 0 24 24">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -173,7 +169,7 @@ export default {
       const sourceAmount = this.sourceAmount
       if (typeof sourceAmount === 'string') {
         Vue.nextTick(() => {
-          this.handleDestAmountInput(sourceAmount)
+          this.handleDestAmountInput(sourceAmount, false)
         })
       }
     },
@@ -199,7 +195,7 @@ export default {
           dest: this.destinationUplink.getInternal()
         })
         .then(() => {
-          this.$store.commit('SHOW_TOAST', `Swap succeeded &ensp; &#127881;`)
+          this.$store.commit('SHOW_TOAST', `Swap complete&ensp;&#127881;`)
         })
         .catch(err => {
           this.$store.commit('SHOW_TOAST', 'Swap failed')
@@ -209,6 +205,10 @@ export default {
             ...this.routeInfo,
             isStreaming: false
           })
+
+          // Refresh input fields (after streaming has stopped)
+          // If capacity changes, watchers will trigger a subsequent refresh
+          this.handleSourceAmountInput(this.sourceAmount, false)
         })
 
       // Animate dots as settlements go out/come in
@@ -246,13 +246,6 @@ export default {
             }
           }
         })
-
-      await streamComplete
-
-      // TODO Show check mark when streaming is complete?
-
-      // Update the input fields since the capacity may have changed
-      this.handleSourceAmountInput(this.sourceAmount)
     },
     toggleMoneyOut(index) {
       Vue.set(this.activeMoneyOut, index, false)
@@ -371,7 +364,7 @@ export default {
         this.sourceAmount = sourceAmount.toString()
       }
     },
-    handleDestAmountInput(input) {
+    handleDestAmountInput(input, showToast = true) {
       if (this.routeInfo.isStreaming) {
         this.destAmount = this.destAmount
         return

@@ -1,16 +1,13 @@
 <template>
   <div id="app">
-    <NavBar />
-    <keep-alive>
-      <transition name="navigate" mode="out-in" appear>
-        <component
-          :is="currentRouteComponent"
-          :route-info="$store.state.route"
-        />
-      </transition>
-    </keep-alive>
-    <toast-manager />
-    <portal-target name="dialog" />
+    <NavBar/>
+    <transition name="navigate" mode="out-in" appear>
+      <keep-alive>
+        <component :is="currentRouteComponent" :route-info="$store.state.route"/>
+      </keep-alive>
+    </transition>
+    <toast-manager/>
+    <portal-target name="dialog"/>
   </div>
 </template>
 
@@ -32,12 +29,12 @@ export default Vue.extend({
     ToastManager
   },
   computed: {
-    currentRouteComponent(): typeof Swap | typeof Home | typeof Spinner {
+    currentRouteComponent(): 'Swap' | 'Home' | 'Spinner' {
       return this.$store.state.route.name === 'swap'
-        ? Swap
+        ? 'Swap'
         : this.$store.state.route.name === 'home'
-        ? Home
-        : Spinner
+        ? 'Home'
+        : 'Spinner'
     }
   }
 })
