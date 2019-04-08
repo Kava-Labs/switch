@@ -107,7 +107,7 @@ export default new Vuex.Store<State>({
     SETUP_API(state, api: SwitchApi) {
       state.api = api
     },
-    REFRESH_UPLINKS(state, initialLoad = false) {
+    REFRESH_UPLINKS(state) {
       if (!state.api) {
         return
       }
@@ -134,22 +134,6 @@ export default new Vuex.Store<State>({
           canWithdraw: ['ETH', 'XRP'].includes(settler.assetCode)
         }
       })
-
-      const noUplinks = state.uplinks.length === 0
-
-      // If initial load, show welcome; otherwise, hide it
-      state.showWelcome = noUplinks && initialLoad
-
-      // Show config dialog if no uplinks are configured
-      state.route = noUplinks
-        ? {
-            name: 'home',
-            meta: 'config'
-          }
-        : (state.route = {
-            name: 'home',
-            meta: 'select-source-uplink'
-          })
     },
     NAVIGATE_TO(state, route: Route) {
       // Prevent deposits and withdrawals to card already depositing
@@ -219,11 +203,29 @@ export default new Vuex.Store<State>({
     }
   },
   actions: {
-    async loadApi({ commit }) {
+    async loadApi({ state, commit }) {
       const api = await connect(LedgerEnv.Testnet)
 
       commit('SETUP_API', Object.freeze(api!))
-      commit('REFRESH_UPLINKS', true)
+      commit('REFRESH_UPLINKS')
+
+      const noUplinks = state.uplinks.length === 0
+
+      // Since this is the initial load, if there aren't any uplinks, show welcome screen
+      state.showWelcome = noUplinks
+      if (noUplinks) {
+        // Show config dialog if no uplinks are configured
+        commit('NAVIGATE_TO', {
+          name: 'home',
+          meta: 'config'
+        })
+      } else {
+        // Otherwise, show home screen
+        commit('NAVIGATE_TO', {
+          name: 'home',
+          meta: 'select-source-uplink'
+        })
+      }
     }
   },
   getters: {
