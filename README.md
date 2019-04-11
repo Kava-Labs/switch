@@ -2,13 +2,11 @@
 <p align="center">
 🏁 Swap crypto assets in seconds using Interledger 💸
 </p>
-<!--🔒 Secure non-custodial trading
-💸 Onboarding to layer 2 networks
--->
 
 ![Switch home screen](./screenshots/swap-alt.png)
 
 <!--![Switch swap screen](./screenshots/screenshot-swap.jpg)-->
+
 <div align="center">
 
 [![GitHub release](https://img.shields.io/github/release/Kava-Labs/switch.svg)](https://github.com/Kava-Labs/switch/releases/latest)
@@ -16,7 +14,6 @@
 [![GitHub](https://img.shields.io/github/license/Kava-Labs/switch.svg)](https://github.com/Kava-Labs/switch/blob/master/LICENSE)
 [![Discourse users](https://img.shields.io/discourse/https/forum.interledger.org/users.svg)](https://forum.interledger.org)
 [![Twitter Follow](https://img.shields.io/twitter/follow/kava_labs.svg?label=Follow&style=social)](https://twitter.com/kava_labs)
-
 </div>
 
 In Switch, you can create and load funds onto "cards" to swap between assets. Only you have access to these funds. Thanks to streaming micropayments, even while trading, you retain full asset custody!
@@ -51,7 +48,7 @@ Switch uses Kava as the default connector, but we will be expanding this to user
 ## Links
  - [FAQs](./docs/faqs.md)
  - [Setup Swaps Over Lightning](./docs/lightning-setup.md)
- - [What is "layer 2" and "payment channels"?](./docs/faqs.md#what-is-layer-2-and-payment channels)
+ - [What is layer 2 and payment channels?](./docs/faqs.md#what-is-layer-2-and-payment-channels)
  - [What is interledger?](./docs/faqs.md#what-is-interledger)
 
 ## Developer Installation
