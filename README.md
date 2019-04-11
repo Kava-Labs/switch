@@ -1,6 +1,6 @@
 <p align="center"><img src="./src/assets/switch-logo.svg" width="300" /></p>
 <p align="center">
-🏁 Swap crypto assets in seconds with Interledger 💸
+🏁 Swap crypto assets in seconds using Interledger 💸
 </p>
 <!--🔒 Secure non-custodial trading
 💸 Onboarding to layer 2 networks
@@ -36,36 +36,23 @@ In Switch, you can create and load funds onto "cards" to swap between assets. On
  4) Click swap to exchange currencies.
 
 # How It Works
-## Non-custodial Trading
+## Fast Non-custodial Trading
 
-When trading between assets, Switch will first send a very small amount of the source asset — the equivalent of $0.05, by default — to the connector. Then, the connector sends some amount of the destination asset. If the connector upholds its side of the bargain and the exchange rate it provides is decent, we repeat the process. And again. And again; many times per second.
+When trading between assets, Switch will first send a very small amount of the source asset, the equivalent of $0.05, to the exchange party known as the connector. Then, the connector sends some amount of the destination asset. If the connector upholds its side of the bargain and the exchange rate it provides is decent, we repeat the process. And again. And again; many times per second.
 
 This is the model of streaming micropayments: moving value bit-by-bit until the entire payment or trade is complete.
 
 If at any point the connector stops sending or sends too little of the destination asset, we halt the exchange. This enables non-custodial trading, since the counterparty risk is merely a few cents.
 
-Switch uses Kava as the default connector, but we hope to expand this to user-defined connectors in the near future.
+Payment channels enable these payments to be cheap and fast.
 
-## Setup Testnet Lightning
- 1) [Download and setup Zap](https://github.com/LN-Zap/zap-desktop#install) on testnet.
-    - You'll need to create or import a testnet wallet and get some testnet btc from the faucet (link provided in Zap).
- 2) Create a channel to the Kava connector.
-    - Find the manage channels page in Zap.
-    - Click `create new channel` and search for the node named `kava-test-2`. Create a channel for more than you want to trade.
-    - In the future, when the lightning network is more mature, this step won't be necessary.
- 3) Create a lightning card in switch
-    - Host will be `localhost`
-    - Port is `11009` for Zap's lnd.
-    - TslCert can be found in the data directory for Zap. The file needs to be base64 encoded. On mac this command will print it: `cat "~/Library/Application Support/Zap/lnd/bitcoin/testnet/<wallet name>/tls.cert" | base64`
-    - Macaroon can also be found in the data directory for Zap. On mac this command will print it: `cat "~/Library/Application Support/Zap/lnd/bitcoin/testnet/<wallet name>/data/chain/bitcoin/testnet/admin.macaroon" | base64`
-    - `<wallet-name>` should be replaced with the name of your wallet, usually "wallet-1".
-<!--
+Switch uses Kava as the default connector, but we will be expanding this to user-defined connectors in the near future.
+
 ## Links
- - [FAQs](./docs/faq.md)
- - [Se]
- - [Understanding Layer 2]()
- - [What is interledger]()
- -->
+ - [FAQs](./docs/faqs.md)
+ - [Setup Swaps Over Lightning](./docs/lightning-setup.md)
+ - [What is "layer 2" and "payment channels"?](./docs/faqs.md#what-is-layer-2-and-payment channels)
+ - [What is interledger?](./docs/faqs.md#what-is-interledger)
 
 ## Developer Installation
 
@@ -76,8 +63,8 @@ Switch uses Kava as the default connector, but we hope to expand this to user-de
 
 # Roadmap
 
-- [x] Add top three currencies
-- [x] Launch public beta
+- [x] Cards for the top three cryptocurrencies
+- [x] Fast swaps
 - [ ] Custom connectors
 - [ ] Peer-to-peer payments
 - [ ] Cards for ERC-20 tokens, such as Dai
