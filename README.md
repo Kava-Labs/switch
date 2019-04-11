@@ -3,9 +3,7 @@
 🏁 Swap crypto assets in seconds using Interledger 💸
 </p>
 
-![Switch home screen](./screenshots/swap-alt-cropped.png)
-
-<!--![Switch swap screen](./screenshots/screenshot-swap.jpg)-->
+![Switch swap screen cropped](./screenshots/swap-alt-cropped.png)
 
 <div align="center">
 
@@ -31,6 +29,11 @@ In Switch, you can create and load funds onto "cards" to swap between assets. On
  3) Click the cards and deposit some coins. Now you're funds are on layer 2!
 
  4) Click swap to exchange currencies.
+
+<p align="middle">
+  <img src="./screenshots/home-alt.png" width="400" /> 
+  <img src="./screenshots/swap-alt.png" width="400" />
+</p>
 
 # How It Works
 ## Fast Non-custodial Trading
