@@ -1,26 +1,30 @@
-<p align="center"><img src="./src/assets/switch-logo.svg" width="200" /></p>
-<p align="center"><b>
-🏁 Swap crypto assets in seconds with Interledger | 🔒 Secure non-custodial trading | 💸 Onboarding to layer 2 networks
-</b></p>
+<p align="center"><img src="./src/assets/switch-logo.svg" width="300" /></p>
+<p align="center">
+🏁 Swap crypto assets in seconds with Interledger 💸
+</p>
+<!--🔒 Secure non-custodial trading
+💸 Onboarding to layer 2 networks
+-->
 
 ![Switch home screen](./screenshots/swap-alt.png)
 
 <!--![Switch swap screen](./screenshots/screenshot-swap.jpg)-->
 <div align="center">
 
-![GitHub release](https://img.shields.io/github/release/Kava-Labs/switch.svg)
-![GitHub All Releases](https://img.shields.io/github/downloads/kava-labs/switch/total.svg)
-![GitHub](https://img.shields.io/github/license/Kava-Labs/switch.svg)
-![Discourse users](https://img.shields.io/discourse/https/forum.interledger.org/users.svg)
-![Twitter Follow](https://img.shields.io/twitter/follow/kava_labs.svg?label=Follow&style=social)
+[![GitHub release](https://img.shields.io/github/release/Kava-Labs/switch.svg)](https://github.com/Kava-Labs/switch/releases/latest)
+[![GitHub All Releases](https://img.shields.io/github/downloads/kava-labs/switch/total.svg)](https://github.com/Kava-Labs/switch/releases)
+[![GitHub](https://img.shields.io/github/license/Kava-Labs/switch.svg)](https://github.com/Kava-Labs/switch/blob/master/LICENSE)
+[![Discourse users](https://img.shields.io/discourse/https/forum.interledger.org/users.svg)](https://forum.interledger.org)
+[![Twitter Follow](https://img.shields.io/twitter/follow/kava_labs.svg?label=Follow&style=social)](https://twitter.com/kava_labs)
 
 </div>
 
 In Switch, you can create and load funds onto "cards" to swap between assets. Only you have access to these funds. Thanks to streaming micropayments, even while trading, you retain full asset custody!
 
-# Getting Started
+# Get Started
 
  1) Download the latest testnet release for Mac, Windows, and Linux [here](https://github.com/Kava-Labs/switch/releases/latest).
+    - To open Switch on mac, you'll need to right click and select open.
 
  2) Add a minimum of two cards. We suggest ETH and XRP to get started.
  
@@ -58,11 +62,12 @@ Switch uses Kava as the default connector, but we hope to expand this to user-de
 <!--
 ## Links
  - [FAQs](./docs/faq.md)
+ - [Se]
  - [Understanding Layer 2]()
  - [What is interledger]()
  -->
 
-# Developer Installation
+## Developer Installation
 
     > git clone https://github.com/kava-labs/switch
     > cd switch
@@ -78,6 +83,6 @@ Switch uses Kava as the default connector, but we hope to expand this to user-de
 - [ ] Cards for ERC-20 tokens, such as Dai
 
 # License
-Copyright (c) Kava Labs, Inc. All rights reserved.
+Copyright © Kava Labs, Inc. All rights reserved.
 
 Licensed under the Apache v2 License.
