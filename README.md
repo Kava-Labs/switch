@@ -3,7 +3,7 @@
 🏁 Swap crypto assets in seconds using Interledger 💸
 </p>
 
-![Switch home screen](./screenshots/swap-alt.png)
+![Switch home screen](./screenshots/swap-alt-cropped.png)
 
 <!--![Switch swap screen](./screenshots/screenshot-swap.jpg)-->
 
