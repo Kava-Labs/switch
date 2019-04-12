@@ -1,9 +1,9 @@
 <p align="center"><img src="./src/assets/switch-logo.svg" width="300" /></p>
 <p align="center">
-🏁 Swap crypto assets in seconds using Interledger 💸
+💸 Swap BTC, ETH, XRP in seconds. Keep your private keys private. 🔒
 </p>
 
-![Switch swap screen cropped](./screenshots/swap-alt-cropped.png)
+![Switch swap screen cropped](./screenshots/swap-eth-btc-cropped-faded.png)
 
 <div align="center">
 
@@ -14,7 +14,9 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/kava_labs.svg?label=Follow&style=social)](https://twitter.com/kava_labs)
 </div>
 
-In Switch, you can create and load funds onto "cards" to swap between assets. Only you have access to these funds. Thanks to streaming micropayments, even while trading, you retain full asset custody!
+Switch is the fastest, most secure way to swap cryptocurrencies. It uses the power of streaming payments and payment channels to get lightning fast swaps, secure self-custody, and interoperability across all blockchains.
+
+Load funds onto "cards", easily swap between them, and unload when you're done. Only you have access to these funds and, thanks to streaming micropayments, even while trading you retain full asset custody!
 
 # Get Started
 
@@ -31,8 +33,8 @@ In Switch, you can create and load funds onto "cards" to swap between assets. On
  4) Click swap to exchange currencies.
 
 <p align="middle">
-  <img src="./screenshots/home-alt.png" width="400" /> 
-  <img src="./screenshots/swap-alt.png" width="400" />
+  <img src="./screenshots/home-eth-btc-xrp.png" width="400" /> 
+  <img src="./screenshots/swap-xrp-eth-success.png" width="400" />
 </p>
 
 # How It Works
