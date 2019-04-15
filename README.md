@@ -14,7 +14,7 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/kava_labs.svg?label=Follow&style=social)](https://twitter.com/kava_labs)
 </div>
 
-Switch is the fastest, most secure way to swap cryptocurrencies. It uses the power of streaming payments and payment channels to get lightning fast swaps, secure self-custody, and interoperability across all blockchains.
+Switch is the fastest, most secure way to swap cryptocurrencies. It uses the power of streaming payments and payment channels to get lightning fast swaps, enables interoperability across all blockchains, all while preserving self-custody.
 
 Load funds onto "cards", easily swap between them, and unload when you're done. Only you have access to these funds and, thanks to streaming micropayments, even while trading you retain full asset custody!
 
@@ -24,7 +24,7 @@ Load funds onto "cards", easily swap between them, and unload when you're done. 
     - To open Switch on mac, you'll need to right click and select open.
 
  2) Add a minimum of two cards. We suggest ETH and XRP to get started.
- 
+
     - Add an Ethereum card using a private key. If you don't have a kovan account, get a private key and address from [this generator](https://vanity-eth.tk). Then load the address with testnet eth at [the Kovan testnet faucet](https://faucet.kovan.network/).
     - Add an XRP card using a xrp secret. If you don't have a test xrp account, get a prefunded testnet secret from [the XRP testnet faucet](https://developers.ripple.com/xrp-test-net-faucet.html).
 
@@ -33,7 +33,7 @@ Load funds onto "cards", easily swap between them, and unload when you're done. 
  4) Click swap to exchange currencies.
 
 <p align="middle">
-  <img src="./screenshots/home-eth-btc-xrp.png" width="400" /> 
+  <img src="./screenshots/home-eth-btc-xrp.png" width="400" />
   <img src="./screenshots/swap-xrp-eth-success.png" width="400" />
 </p>
 
@@ -67,6 +67,7 @@ Switch uses Kava as the default connector, but we will be expanding this to user
 
 - [x] Cards for the top three cryptocurrencies
 - [x] Fast swaps
+- [ ] Mainnet
 - [ ] Custom connectors
 - [ ] Peer-to-peer payments
 - [ ] Cards for ERC-20 tokens, such as Dai
