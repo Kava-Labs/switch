@@ -17,7 +17,9 @@ Money is transferred on the blockchain to a secure holding place. Then special m
 The longer money is held in channels the cheaper and faster payments can be overall. This idea of holding money in these channels is known as being "on layer 2" (as they form a layer above the underlying blockchain, which itself is known as layer 1).
 
 # Why can't I trade sometimes, even though I have a balance?
-Your money in the balance securely held in a payment channel. Normally this can be traded freely. However after a few trades the money enters a state where it cannot be sent. You "outgoing capacity" has reduced to too low a level. To fix this, deposit additional funds, or withdraw and deposit again.
+Your money in the balance is secured in payment channels. For XRP and ETH, Switch uses unidirectional payment channels (one from you to the connector, and another from the connector to you). When you receive money in a one-way payment channel, it's fully in your custody, but you can't send it directly back to the connector. 
+
+After a few trades, you may have exhausted the funds in the outgoing channel from you to the connector (sent all or most of the funds to the connector). To fix this, deposit additional funds to the card, which will replenish the payment channel.
 
 # Why can't I see all my money on a card?
 The card balance shows how much is held in "layer 2", that is in a payment channel.  
