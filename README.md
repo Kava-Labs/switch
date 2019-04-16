@@ -14,7 +14,7 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/kava_labs.svg?label=Follow&style=social)](https://twitter.com/kava_labs)
 </div>
 
-Switch is the fastest, most secure way to swap cryptocurrencies. Streaming payments and payment channels enable lightning-fast swaps, interoperability across blockchains, and complete self-custody of assets.
+Switch is the fastest, most secure way to swap cryptocurrencies. Recent developments in blockchain scaling enable lightning-fast swaps, interoperability across blockchains, and complete self-custody of assets.
 
 Load funds onto "cards", easily swap between them, and unload when you're done. Only you have access to these funds and, thanks to streaming micropayments, even while trading you retain full asset custody!
 
@@ -62,8 +62,7 @@ Switch uses Kava as the default connector, but we will be expanding this to user
 
 # Roadmap
 
-- [x] Cards for the top three cryptocurrencies
-- [x] Fast swaps
+- [x] Integration of the top three cryptocurrencies
 - [ ] Mainnet
 - [ ] Custom connectors
 - [ ] Peer-to-peer payments
