@@ -51,7 +51,7 @@ Switch uses Kava as the default connector, but we will be expanding this to user
  - [FAQs](./docs/faqs.md)
  - [Setup Swaps Over Lightning](./docs/lightning-setup.md)
  - [What is layer 2 and payment channels?](./docs/faqs.md#what-is-layer-2-and-payment-channels)
- - [What is interledger?](./docs/faqs.md#what-is-interledger)
+ - [What is Interledger?](./docs/faqs.md#what-is-interledger)
 
 ## Developer Installation
 
