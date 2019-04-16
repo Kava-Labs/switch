@@ -1,4 +1,4 @@
-<p align="center"><img src="./src/assets/switch-logo.svg" width="300" /></p>
+<p align="center"><img src="./src/assets/switch-logo.svg" width="250" /></p>
 <p align="center">
 💸 Swap BTC, ETH, XRP in seconds. Keep your private keys private. 🔒
 </p>
