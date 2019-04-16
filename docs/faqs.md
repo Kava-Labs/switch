@@ -4,10 +4,12 @@ Yes. Switch is architected so you never need to trust a third party to hold your
 By comparison, centralized cryptocurrency exchanges hold your money on your behalf and are regularly hacked, losing users' funds.
 
 # How is it so fast?
-Switch achieves it's combination of speed and security by using "payment channels" - a futuristic blockchain feature often theorized about but only now achieving real implementation.
+Switch achieves its combination of speed and security by building on recent developements in blockchain scaling. It uses the Interledger protocol for coordinating routing and exchange, and payment channels for speed and security.
 
 # What is Interledger?
-Interledger is an open protocol suite for sending payments across different ledgers. Like routers on the Internet, connectors route packets of money across independent payment networks. The open architecture and minimal protocol enable interoperability for any value transfer system. Interledger is not tied to any one company, blockchain, or currency. 
+Interledger is an open protocol suite for sending payments across different ledgers. Modelled after the Internet protocols, it coordinates packets of money to be routed across independent payment networks through a network of untrusted nodes. The open architecture and minimal protocol enable interoperability for any value transfer system. Interledger is not tied to any one company, blockchain, or currency.
+
+[This medium post](https://medium.com/xpring/interledger-how-to-interconnect-all-blockchains-and-value-networks-74f432e64543) gives a good overview of the protocol.
 
 # What is "layer 2"? What are "payment channels"?
 Payment channels are a technology to speed up payments on blockchains while retaining strong security guarantees.
