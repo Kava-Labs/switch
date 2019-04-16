@@ -3,7 +3,7 @@
 💸 Swap BTC, ETH, XRP in seconds. Keep your private keys private. 🔒
 </p>
 
-![Switch swap screen cropped](./screenshots/swap-eth-btc-cropped-faded.png)
+![Switch swap screen cropped](./screenshots/swap-eth-btc-cropped.png)
 
 <div align="center">
 
