@@ -32,10 +32,8 @@ Load funds onto "cards", easily swap between them, and unload when you're done. 
 
  4) Click swap to exchange currencies.
 
-<p align="middle">
-  <img src="./screenshots/home-eth-btc-xrp.png" width="400" />
-  <img src="./screenshots/swap-xrp-eth-success.png" width="400" />
-</p>
+![Screenshot Home](./screenshots/home-eth-btc-xrp.png)
+![Screenshot Swap](./screenshots/swap-xrp-eth-success.png)
 
 # How It Works
 ## Fast Non-custodial Trading
