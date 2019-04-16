@@ -1,7 +1,7 @@
 # Are my funds secure?
 Yes. The architecture of Switch means that you never need to trust a third party to hold you money. Before during and after a trade your money only ever belongs to you.
 
-By comparison centralized cryptocurrency exchanges hold your money on your behalf and are regularly hacked, loosing users's funds.
+By comparison, centralized cryptocurrency exchanges hold your money on your behalf and are regularly hacked, losing users' funds.
 
 # How is it so fast?
 Switch achieves it's combination of speed and security by using "payment channels" - a futuristic blockchain feature often theorized about but only now achieving real implementation.
