@@ -9,7 +9,7 @@ Switch achieves it's combination of speed and security by using "payment channel
 # What is Interledger?
 Interledger is an open protocol suite for sending payments across different ledgers. Like routers on the Internet, connectors route packets of money across independent payment networks. The open architecture and minimal protocol enable interoperability for any value transfer system. Interledger is not tied to any one company, blockchain, or currency. 
 
-# What is "layer 2" and "payment channels"?
+# What is "layer 2"? What are "payment channels"?
 Payment channels are a technology to speed up payments on blockchains while retaining strong security guarantees.
 
 Money is transferred on the blockchain to a secure holding place. Then special messages can be sent between the sender and receiver that enable each to withdraw money from the holding place. Depending on the messages sent, the sender and receiver can withdraw varying amounts from the holding place; hence the messages act as real payments. These channels can then be linked together to send payments to anyone, rather than just the original two parties.
