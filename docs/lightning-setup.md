@@ -7,7 +7,7 @@
     - In the future, when the lightning network is more mature, this step won't be necessary.
  3) Create a lightning card in switch
     - Host will be `localhost`
-    - Port is `11009` for Zap's lnd.
+    - gRPC Port: `11009`
     - TslCert can be found in the data directory for Zap. The file needs to be base64 encoded. On mac this command will print it: `cat "~/Library/Application Support/Zap/lnd/bitcoin/testnet/<wallet name>/tls.cert" | base64`
     - Macaroon can also be found in the data directory for Zap. On mac this command will print it: `cat "~/Library/Application Support/Zap/lnd/bitcoin/testnet/<wallet name>/data/chain/bitcoin/testnet/admin.macaroon" | base64`
     - Note: `<wallet-name>` above should be replaced with the name of your wallet, usually "wallet-1".
