@@ -1,5 +1,5 @@
 # Are my funds secure?
-Yes. The architecture of Switch means that you never need to trust a third party to hold you money. Before during and after a trade your money only ever belongs to you.
+Yes. Switch is architected so you never need to trust a third party to hold your money. Before, during, and after a trade, your money is only ever accessible to you.
 
 By comparison, centralized cryptocurrency exchanges hold your money on your behalf and are regularly hacked, losing users' funds.
 
