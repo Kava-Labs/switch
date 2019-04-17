@@ -51,6 +51,7 @@ import AmountInput from '@/components/swap/AmountInput.vue'
 import { convert, usd } from '@kava-labs/crypto-rate-utils'
 
 const MAX_DEPOSIT_AMOUNT = usd(10)
+const MIN_DEPOSIT_AMOUNT = usd(0.99)
 
 export default {
   components: { AmountInput },
@@ -162,6 +163,16 @@ export default {
     },
     acceptDeposit() {
       if (new BigNumber(this.depositAmount).isZero()) {
+        return
+      }
+
+      const minDeposit = convert(
+        MIN_DEPOSIT_AMOUNT,
+        this.uplink.unit(),
+        this.$store.getters.rateApi
+      )
+      if (new BigNumber(this.depositAmount).isLessThan(minDeposit)) {
+        this.$store.commit('SHOW_TOAST', 'Minimum deposit is $1')
         return
       }
 

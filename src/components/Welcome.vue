@@ -15,7 +15,9 @@
     </p>
     <section class="welcome__cta">
       <m-button raised @click="selectTestnet">Testnet</m-button>
-      <m-button class="welcome__cta__mainnet-button" @click="selectMainnet">Mainnet</m-button>
+      <m-button class="welcome__cta__mainnet-button" @click="selectMainnet"
+        >Mainnet</m-button
+      >
     </section>
   </section>
 </template>
