@@ -20,13 +20,13 @@ Load funds onto "cards", easily swap between them, and unload when you're done. 
 
 # Get Started
 
- 1) Download the latest testnet release for Mac, Windows, and Linux [here](https://github.com/Kava-Labs/switch/releases/latest).
+ 1) Download the latest release for Mac, Windows, and Linux [here](https://github.com/Kava-Labs/switch/releases/latest).
     > To open Switch on Mac, right or Control click on the app icon and select "Open".
 
- 2) Add a minimum of two cards. We suggest ETH and XRP to get started.
+ 2) Add a minimum of two cards. We suggest choosing testnet and using ETH and XRP to get started.
 
     - Add an Ethereum card using a private key. If you don't have a Kovan testnet account, generate a private key and address [here](https://vanity-eth.tk). Then, load the address with testnet ether at [the Kovan testnet faucet](https://faucet.kovan.network/).
-    - Add an XRP card using a XRP secret. If you don't have a testnet account, generate a prefunded testnet account and secret from [the XRP testnet faucet](https://developers.ripple.com/xrp-test-net-faucet.html).
+    - Add an XRP card using a XRP secret. If you don't have a testnet account, generate a prefunded account and secret from [the XRP testnet faucet](https://developers.ripple.com/xrp-test-net-faucet.html).
     > Switch will prompt you to securely deposit funds onto your cards as you add them.
 
  4) Click swap to exchange currencies.
@@ -63,7 +63,7 @@ Switch uses Kava as the default connector, but we will be expanding this to user
 # Roadmap
 
 - [x] Integration of the top three cryptocurrencies
-- [ ] Mainnet
+- [x] Mainnet
 - [ ] Custom connectors
 - [ ] Peer-to-peer payments
 - [ ] Cards for ERC-20 tokens, such as Dai
