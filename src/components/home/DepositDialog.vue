@@ -1,41 +1,46 @@
 <template>
-  <section>
+  <section class="dialog-container">
     <div class="backdrop" @click="cancelDeposit"></div>
-    <section class="deposit-dialog dialog">
-      <header class="deposit-dialog__header">Deposit</header>
-      <main>
-        <p class="deposit-dialog__custody-notice">
-          Deposit funds onto your card to enable swapping and instant streaming
-          payments.
-        </p>
-        <p
-          class="deposit-dialog__custody-notice deposit-dialog__custody-notice--bold"
-        >
-          Only you have access to these funds.
-        </p>
-        <AmountInput
-          class="deposit-dialog__amount-input"
-          :amount="depositAmount"
-          :amount-usd="helperText"
-          :asset-code="uplink.unit().symbol"
-          :focused="true"
-          @input="handleDepositAmountInput"
-        />
-      </main>
-      <footer class="deposit-dialog__actions">
-        <m-button
-          class="deposit-dialog__actions__cancel-button"
-          @click="cancelDeposit"
-          >Cancel</m-button
-        >
-        <m-button
-          class="deposit-dialog__actions__accept-button"
-          raised
-          @click="acceptDeposit"
-          >Deposit</m-button
-        >
-      </footer>
-    </section>
+    <transition name="prompt2" mode="out-in" appear>
+      <section v-if="feeEstimate" class="deposit-dialog dialog">
+        <header class="deposit-dialog__header">Deposit</header>
+        <main>
+          <p class="deposit-dialog__custody-notice">
+            Deposit funds onto your card to enable swapping and instant
+            streaming payments.
+          </p>
+          <p
+            class="deposit-dialog__custody-notice deposit-dialog__custody-notice--bold"
+          >
+            Only you have access to these funds.
+          </p>
+          <AmountInput
+            class="deposit-dialog__amount-input"
+            :amount="depositAmount"
+            :amount-usd="helperText"
+            :asset-code="uplink.unit().symbol"
+            :focused="true"
+            @input="handleDepositAmountInput"
+          />
+        </main>
+        <footer class="deposit-dialog__actions">
+          <m-button
+            class="deposit-dialog__actions__cancel-button"
+            @click="cancelDeposit"
+            >Cancel</m-button
+          >
+          <m-button
+            class="deposit-dialog__actions__accept-button"
+            raised
+            @click="acceptDeposit"
+            >Deposit</m-button
+          >
+        </footer>
+      </section>
+    </transition>
+    <transition name="fade" mode="out-in" appear>
+      <div v-if="!feeEstimate" class="spinner" />
+    </transition>
   </section>
 </template>
 
@@ -57,7 +62,8 @@ export default {
   },
   data() {
     return {
-      depositAmount: null
+      depositAmount: null,
+      feeEstimate: null
     }
   },
   computed: {
@@ -67,9 +73,12 @@ export default {
       )
     },
     helperText() {
-      const showUsdAmount =
-        this.depositAmount && !new BigNumber(this.depositAmount).isNaN()
-      if (!showUsdAmount) {
+      const showHelperText =
+        this.depositAmount &&
+        !new BigNumber(this.depositAmount).isNaN() &&
+        new BigNumber(this.depositAmount).isGreaterThan(0) &&
+        this.feeEstimate
+      if (!showHelperText) {
         return null
       }
 
@@ -79,14 +88,44 @@ export default {
         this.$store.getters.rateApi
       ).toFixed(2, BigNumber.ROUND_CEIL)
 
-      return '$' + usdAmount
+      const feeEstimate = convert(
+        this.uplink.unit(this.feeEstimate),
+        usd(),
+        this.$store.getters.rateApi
+      ).toFixed(4, BigNumber.ROUND_CEIL)
+
+      return '$' + usdAmount + ' + $' + feeEstimate + ' fee*'
     }
+  },
+  async created() {
+    // Generate a fee esimate as if we were depositing
+    const amount = convert(
+      usd(1),
+      this.uplink.unit(),
+      this.$store.getters.rateApi
+    ).decimalPlaces(this.uplink.unit().exchangeUnit, BigNumber.ROUND_DOWN)
+
+    this.feeEstimate = await new Promise((resolve, reject) => {
+      this.$store.state.api
+        .deposit({
+          uplink: this.uplink.getInternal(),
+          amount,
+          authorize: ({ fee }) => {
+            resolve(fee)
+            return Promise.reject()
+          }
+        })
+        .then(reject, reject)
+    }).catch(err => {
+      this.$store.commit('SHOW_TOAST', 'Failed to estimate fee for deposit')
+      this.cancelDeposit()
+    })
   },
   methods: {
     handleDepositAmountInput(input) {
       // Allow the fields to be cleared
       if (input.length === 0) {
-        return null
+        this.depositAmount = null
       }
 
       // Ensure correct formatting & positive
@@ -155,15 +194,41 @@ export default {
 </script>
 
 <style lang="scss">
+.spinner {
+  position: absolute;
+  z-index: 15;
+  width: 64px;
+  height: 64px;
+  margin: 20px auto;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 6px solid $secondary-100;
+  border-left: 6px solid $secondary;
+  animation: spin 600ms linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dialog-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .deposit-dialog {
   width: 420px;
-  height: 360px;
   padding: 40px;
   box-sizing: border-box;
   position: absolute;
   z-index: 20;
-  left: calc((100% - 420px) / 2);
-  top: calc((100% - 360px) / 2);
   background: white;
   border-radius: $card-radii;
   transform: scale(1);
@@ -205,7 +270,7 @@ export default {
   }
 
   &__amount-input {
-    margin: 20px 0 0 0;
+    margin: 20px 0 20px 0;
   }
 }
 
@@ -215,9 +280,29 @@ export default {
   position: absolute;
   left: 0;
   top: 0;
-  z-index: 15;
+  z-index: 10;
   background: black;
   opacity: 0.5;
   transform: translateY(0) !important;
+}
+
+.prompt2-enter-active,
+.prompt2-leave-active {
+  transition-property: transform, opacity;
+  transition-duration: 200ms; // Solely to trick Vue into applying the transition classes
+}
+
+.prompt2-enter-active {
+  transition-timing-function: $easing-decelerate;
+}
+
+.prompt2-leave-active {
+  transition-timing-function: $easing-accelerate;
+}
+
+.prompt2-enter,
+.prompt2-leave-to {
+  opacity: 0;
+  transform: scale(0);
 }
 </style>
