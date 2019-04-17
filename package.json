@@ -41,7 +41,7 @@
   "homepage": "https://github.com/Kava-Labs/switch#readme",
   "dependencies": {
     "@kava-labs/crypto-rate-utils": "^3.0.1",
-    "@kava-labs/switch-api": "^0.5.2",
+    "@kava-labs/switch-api": "^0.5.3",
     "bignumber.js": "^7.2.1",
     "electron": "^4.1.4",
     "electron-better-ipc": "^0.2.0",
