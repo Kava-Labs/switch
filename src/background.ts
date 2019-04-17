@@ -30,7 +30,7 @@ function createWindow() {
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
-    if (!process.env.IS_TEST) win.webContents.openDevTools()
+    win.webContents.openDevTools()
   } else {
     createProtocol('app')
     win.loadURL('app://./index.html')
