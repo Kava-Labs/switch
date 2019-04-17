@@ -26,7 +26,7 @@ Load funds onto "cards", easily swap between them, and unload when you're done. 
  2) Add a minimum of two cards. We suggest choosing testnet and using ETH and XRP to get started.
 
     - Add an Ethereum card using a private key. If you don't have a Kovan testnet account, generate a private key and address [here](https://vanity-eth.tk). Then, load the address with testnet ether at [the Kovan testnet faucet](https://faucet.kovan.network/).
-    - Add an XRP card using a XRP secret. If you don't have a testnet account, generate a prefunded testnet account and secret from [the XRP testnet faucet](https://developers.ripple.com/xrp-test-net-faucet.html).
+    - Add an XRP card using a XRP secret. If you don't have a testnet account, generate a prefunded account and secret from [the XRP testnet faucet](https://developers.ripple.com/xrp-test-net-faucet.html).
     > Switch will prompt you to securely deposit funds onto your cards as you add them.
 
  4) Click swap to exchange currencies.
