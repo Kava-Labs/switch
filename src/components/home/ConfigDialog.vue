@@ -4,8 +4,8 @@
     <section class="config-dialog dialog">
       <transition name="fade" mode="out-in">
         <section v-if="!config" key="select-asset">
-          <header class="config-dialog__header">{{ headerText }}</header>
-          <p v-if="$store.state.showWelcome" class="config-dialog__get-started">
+          <header class="config-dialog__header">Add Card</header>
+          <p class="config-dialog__get-started">
             To get started, select an asset, then add a new card.
           </p>
           <section class="button-container">
@@ -34,7 +34,11 @@
           <header class="config-dialog__header">Add {{ assetName }}</header>
           <main>
             <section v-if="isXrp" class="config-dialog__config">
-              <p class="config-dialog__instructions">
+              <p v-if="isMainnet" class="config-dialog__instructions">
+                Configure a new card with an XRP account. After, you'll have the
+                option to fund the card.
+              </p>
+              <p v-else class="config-dialog__instructions">
                 Configure a new card with an
                 <a
                   class="a"
@@ -55,7 +59,11 @@
               </m-text-field>
             </section>
             <section v-if="isEth" class="config-dialog__config">
-              <p class="config-dialog__instructions">
+              <p v-if="isMainnet" class="config-dialog__instructions">
+                Configure a new card with an Ethereum account. After, you'll
+                have the option to fund the card.
+              </p>
+              <p v-else class="config-dialog__instructions">
                 Configure a new card with a Kovan testnet account. After, you'll
                 have the option to fund the card.
               </p>
@@ -72,7 +80,10 @@
               </m-text-field>
             </section>
             <section v-if="isLightning" class="config-dialog__config">
-              <p class="config-dialog__instructions">
+              <p v-if="isMainnet" class="config-dialog__instructions">
+                Configure a new card with credentials for a Bitcoin LND node.
+              </p>
+              <p v-else class="config-dialog__instructions">
                 Configure a new card with credentials for a Bitcoin testnet LND
                 node.
               </p>
@@ -144,7 +155,7 @@
 </template>
 
 <script>
-import { SettlementEngineType } from '@kava-labs/switch-api'
+import { SettlementEngineType, LedgerEnv } from '@kava-labs/switch-api'
 import { generateUplinkId } from '@/store'
 import { shell } from 'electron'
 
@@ -156,9 +167,6 @@ export default {
     }
   },
   computed: {
-    headerText() {
-      return this.$store.state.showWelcome ? 'Welcome to Switch!' : 'Add Card'
-    },
     assetName() {
       return this.isXrp ? 'XRP' : this.isEth ? 'Ethereum' : 'Lightning'
     },
@@ -179,6 +187,9 @@ export default {
     },
     noUplinks() {
       return this.$store.state.uplinks.length === 0
+    },
+    isMainnet() {
+      return this.$store.state.ledgerEnv === LedgerEnv.Mainnet
     }
   },
   methods: {
@@ -410,7 +421,7 @@ export default {
   position: absolute;
   left: 0;
   top: 0;
-  z-index: 15;
+  z-index: 10;
   background: black;
   opacity: 0.5;
 }

@@ -1,10 +1,5 @@
 import { AssetUnit } from '@kava-labs/crypto-rate-utils'
-import {
-  connect,
-  SwitchApi,
-  LedgerEnv,
-  ReadyUplinks
-} from '@kava-labs/switch-api'
+import { connect, IlpSdk, LedgerEnv, ReadyUplinks } from '@kava-labs/switch-api'
 import BigNumber from 'bignumber.js'
 import { createHmac } from 'crypto'
 import Vue from 'vue'
@@ -26,6 +21,8 @@ export interface Uplink {
   balance$: BehaviorSubject<BigNumber>
   incomingCapacity$: BehaviorSubject<BigNumber>
   outgoingCapacity$: BehaviorSubject<BigNumber>
+  totalSent$: BehaviorSubject<BigNumber>
+  totalReceived$: BehaviorSubject<BigNumber>
   activeDeposit: null | Promise<void>
   activeWithdrawal: null | Promise<void>
   canDeposit: boolean
@@ -37,7 +34,7 @@ export interface Uplink {
  * ROUTES
  */
 
-type Route = HomeRoute | SwapRoute | LoadingSpinner
+type Route = HomeRoute | SwapRoute | LoadingSpinner | WelcomeRoute
 
 export interface SwapRoute {
   name: 'swap'
@@ -48,6 +45,10 @@ export interface SwapRoute {
 
 export interface LoadingSpinner {
   name: 'loading'
+}
+
+export interface WelcomeRoute {
+  name: 'welcome'
 }
 
 export type HomeRoute = {
@@ -81,9 +82,9 @@ export type MetaRoute =
     }
 
 export interface State {
-  showWelcome: boolean
+  ledgerEnv: LedgerEnv | null
   route: Route
-  api?: Readonly<SwitchApi>
+  api?: Readonly<IlpSdk>
   uplinks: Uplink[]
   toasts: {
     key: string
@@ -96,15 +97,15 @@ export const generateUplinkId = (uplink: ReadyUplinks) =>
 
 export default new Vuex.Store<State>({
   state: {
-    showWelcome: false,
+    ledgerEnv: null,
     route: {
-      name: 'loading'
+      name: 'welcome'
     },
     uplinks: [],
     toasts: []
   },
   mutations: {
-    SETUP_API(state, api: SwitchApi) {
+    SETUP_API(state, api: IlpSdk) {
       state.api = api
     },
     REFRESH_UPLINKS(state) {
@@ -125,6 +126,8 @@ export default new Vuex.Store<State>({
           balance$: uplink.balance$,
           incomingCapacity$: uplink.incomingCapacity$,
           outgoingCapacity$: uplink.outgoingCapacity$,
+          totalSent$: uplink.totalSent$,
+          totalReceived$: uplink.totalReceived$,
           getInternal: () => uplink,
           activeDeposit: existingUplink ? existingUplink.activeDeposit : null,
           activeWithdrawal: existingUplink
@@ -200,19 +203,37 @@ export default new Vuex.Store<State>({
       if (uplink) {
         uplink.activeWithdrawal = null
       }
+    },
+    SET_LEDGER_ENV(state, ledgerEnv: LedgerEnv) {
+      state.ledgerEnv = ledgerEnv
     }
   },
   actions: {
-    async loadApi({ state, commit }) {
-      const api = await connect(LedgerEnv.Testnet)
+    async loadApi({ state, commit }, ledgerEnv: LedgerEnv) {
+      if (state.api) {
+        if (ledgerEnv === state.ledgerEnv) {
+          // If the ledgerEnv is set to the same, just go home
+          return commit('NAVIGATE_TO', {
+            name: 'home',
+            meta: 'select-source-uplink'
+          })
+        }
+
+        await state.api.disconnect()
+      }
+
+      commit('NAVIGATE_TO', {
+        name: 'loading'
+      })
+
+      commit('SET_LEDGER_ENV', ledgerEnv)
+      const api = await connect(ledgerEnv)
 
       commit('SETUP_API', Object.freeze(api!))
       commit('REFRESH_UPLINKS')
 
-      const noUplinks = state.uplinks.length === 0
-
       // Since this is the initial load, if there aren't any uplinks, show welcome screen
-      state.showWelcome = noUplinks
+      const noUplinks = state.uplinks.length === 0
       if (noUplinks) {
         // Show config dialog if no uplinks are configured
         commit('NAVIGATE_TO', {

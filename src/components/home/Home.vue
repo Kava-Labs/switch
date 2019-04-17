@@ -148,7 +148,7 @@ export default Vue.extend({
 
 .prompt-enter-active,
 .prompt-leave-active {
-  transition: opacity 200ms; // Solely to trick Vue into apply the transition classes
+  transition: opacity 200ms; // Solely to trick Vue into applying the transition classes
 }
 
 .prompt-enter-active {

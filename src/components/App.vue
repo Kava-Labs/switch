@@ -1,13 +1,11 @@
 <template>
   <div id="app">
-    <NavBar/>
+    <NavBar />
     <transition name="navigate" mode="out-in" appear>
-      <keep-alive>
-        <component :is="currentRouteComponent" :route-info="$store.state.route"/>
-      </keep-alive>
+      <component :is="currentRouteComponent" :route-info="$store.state.route" />
     </transition>
-    <toast-manager/>
-    <portal-target name="dialog"/>
+    <toast-manager />
+    <portal-target name="dialog" />
   </div>
 </template>
 
@@ -17,6 +15,7 @@ import Home from '@/components/home/Home.vue'
 import Swap from '@/components/swap/Swap.vue'
 import Spinner from '@/components/Spinner.vue'
 import ToastManager from '@/components/ToastManager.vue'
+import Welcome from '@/components/Welcome.vue'
 import Vue from 'vue'
 
 export default Vue.extend({
@@ -26,12 +25,15 @@ export default Vue.extend({
     Home,
     Swap,
     Spinner,
-    ToastManager
+    ToastManager,
+    Welcome
   },
   computed: {
-    currentRouteComponent(): 'Swap' | 'Home' | 'Spinner' {
+    currentRouteComponent(): 'Swap' | 'Home' | 'Welcome' | 'Spinner' {
       return this.$store.state.route.name === 'swap'
         ? 'Swap'
+        : this.$store.state.route.name === 'welcome'
+        ? 'Welcome'
         : this.$store.state.route.name === 'home'
         ? 'Home'
         : 'Spinner'

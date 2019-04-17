@@ -1,15 +1,13 @@
 <template>
-  <div class="toast-container">
-    <transition-group name="stack">
-      <div
-        v-for="toast in $store.state.toasts"
-        :key="toast.key"
-        class="toast"
-        @click="$store.commit('HIDE_TOAST', toast.key)"
-        v-html="toast.message"
-      />
-    </transition-group>
-  </div>
+  <transition-group name="stack" class="toast-container" tag="div">
+    <div
+      v-for="toast in $store.state.toasts"
+      :key="toast.key"
+      class="toast"
+      @click="$store.commit('HIDE_TOAST', toast.key)"
+      v-html="toast.message"
+    />
+  </transition-group>
 </template>
 
 <style lang="scss" scoped>

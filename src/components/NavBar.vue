@@ -12,7 +12,16 @@
         </div>
       </transition>
       <img class="header__nav__logo" src="@/assets/switch-logo.svg" />
-      <div class="header__nav__testnet-badge">Testnet</div>
+      <transition name="fade" mode="out-in" appear>
+        <div
+          v-if="ledgerEnv"
+          class="header__nav__badge"
+          :class="`header__nav__badge--${ledgerEnv}`"
+          @click="selectMode"
+        >
+          {{ ledgerEnv }}
+        </div>
+      </transition>
     </nav>
     <transition name="fly-in" mode="out-in">
       <nav v-if="showSelectDestBar" class="header__select-bar">
@@ -32,6 +41,8 @@
 </template>
 
 <script>
+import { LedgerEnv } from '@kava-labs/switch-api'
+
 export default {
   computed: {
     showSelectDestBar() {
@@ -45,9 +56,17 @@ export default {
         this.$store.state.route.name === 'swap' &&
         !this.$store.state.route.isStreaming
       )
+    },
+    ledgerEnv() {
+      return this.$store.state.ledgerEnv
     }
   },
   methods: {
+    selectMode() {
+      this.$store.commit('NAVIGATE_TO', {
+        name: 'welcome'
+      })
+    },
     cancelSwap() {
       const route = this.$store.state.route
       if (route.name !== 'swap' || !route.isStreaming) {
@@ -105,7 +124,7 @@ $mdc-theme-primary: white;
       -webkit-user-drag: none;
     }
 
-    &__testnet-badge {
+    &__badge {
       position: relative;
       padding: 4px 7px;
       left: 130px;
@@ -116,6 +135,16 @@ $mdc-theme-primary: white;
       font-size: 10pt;
       font-weight: 700;
       color: $secondary;
+      user-select: none;
+      cursor: pointer;
+      transition-property: color, border-color;
+      transition-duration: 200ms;
+      transition-timing-function: $easing-standard;
+
+      &--mainnet {
+        color: $mainnet-accent;
+        border-color: $mainnet-accent;
+      }
     }
   }
 

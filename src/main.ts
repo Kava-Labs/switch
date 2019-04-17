@@ -17,9 +17,6 @@ Vue.use(PortalVue)
 
 new Vue({
   store,
-  created() {
-    this.$store.dispatch('loadApi')
-  },
   mounted() {
     ipc.answerMain('before-window-close', () => {
       return this.$store.state.api.disconnect()

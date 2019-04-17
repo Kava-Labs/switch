@@ -4,8 +4,8 @@
 
 <style lang="scss" scoped>
 .spinner {
-  margin: auto;
   position: relative;
+  z-index: 15;
   width: 64px;
   height: 64px;
   margin: 20px auto;

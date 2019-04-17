@@ -18,7 +18,7 @@
       class="swap__interledger-logo"
       :class="{ 'swap__interledger-logo--spin': routeInfo.isStreaming }"
       src="~@/assets/interledger-logo.svg"
-    >
+    />
     <div class="swap__source-pipe">
       <div
         v-for="(isActive, index) in activeMoneyOut"
@@ -55,7 +55,11 @@
     />
     <transition name="fade" mode="out-in" appear>
       <div v-if="!routeInfo.isStreaming" class="swap__actions">
-        <m-button class="swap__actions__go-button" outlined @click="startStream">
+        <m-button
+          class="swap__actions__go-button"
+          outlined
+          @click="startStream"
+        >
           <span>Go</span>
           <svg slot="icon" viewBox="0 0 24 24">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
