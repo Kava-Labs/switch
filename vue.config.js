@@ -1,6 +1,5 @@
 const path = require('path')
 const webpack = require('webpack')
-const { fetch } = require('envkey/loader')
 
 module.exports = {
   pluginOptions: {
@@ -28,15 +27,19 @@ module.exports = {
       }
     }
   },
-  configureWebpack: {
-    plugins: [
-      new webpack.EnvironmentPlugin({
-        // TODO Disable both of these in production!
-        // DEBUG: '"ilp*,switch*"'
-        // Load vars from envkey
-        // ...fetch()
-      })
-    ]
+  chainWebpack: config => {
+    /** For development, show debug logs */
+    if (process.env.NODE_ENV !== 'production') {
+      config
+        .plugin('environment')
+        .after('define')
+        .use(webpack.EnvironmentPlugin, [
+          {
+            /** Do NOT add quotes. '"ilp*"' doesn't work! */
+            DEBUG: 'ilp*,switch*'
+          }
+        ])
+    }
   },
   /*
    * Importing MDC component styles causes issues with our Webpack config, which this fixes:
