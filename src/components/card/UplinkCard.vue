@@ -60,11 +60,13 @@
 </template>
 
 <script lang="ts">
-import UplinkCardButton from '@/components/card/UplinkCardButton.vue'
-import BigNumber from 'bignumber.js'
-import { mapGetters } from 'vuex'
 import Vue from 'vue'
+import { mapGetters } from 'vuex'
+
 import { Uplink } from '@/store'
+import UplinkCardButton from '@/components/card/UplinkCardButton.vue'
+
+import BigNumber from 'bignumber.js'
 
 export default Vue.extend({
   components: { UplinkCardButton },
@@ -161,20 +163,18 @@ export default Vue.extend({
     },
     deposit() {
       this.$store.commit('NAVIGATE_TO', {
-        name: 'home',
-        meta: 'deposit',
+        type: 'deposit',
         id: this.uplink.id
       })
     },
     withdraw() {
       this.$store.commit('NAVIGATE_TO', {
-        name: 'home',
-        meta: 'withdrawal',
+        type: 'withdraw',
         id: this.uplink.id
       })
     },
     async remove() {
-      await this.$store.state.api.remove(this.uplink.getInternal())
+      await this.$store.state.sdk.remove(this.uplink.getInternal())
       this.$store.commit('REFRESH_UPLINKS')
     }
   }
@@ -328,8 +328,8 @@ export default Vue.extend({
   &--btc {
     #{ $self }__front {
       background-image: url('~@/assets/lightning-logo.png');
-      background-position: left -40px top -40px;
-      background-size: 250px;
+      background-position: left -25px top -55px;
+      background-size: 260px;
     }
   }
 

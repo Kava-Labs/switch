@@ -1,42 +1,35 @@
 <template>
   <div id="app">
-    <NavBar />
+    <nav-bar />
     <transition name="navigate" mode="out-in" appear>
-      <component :is="currentRouteComponent" :route-info="$store.state.route" />
+      <component :is="currentRouteComponent" :route="$store.state.route" />
     </transition>
     <toast-manager />
-    <portal-target name="dialog" />
+    <modal-dialog />
   </div>
 </template>
 
 <script lang="ts">
-import NavBar from '@/components/NavBar.vue'
-import Home from '@/components/home/Home.vue'
-import Swap from '@/components/swap/Swap.vue'
-import Spinner from '@/components/Spinner.vue'
-import ToastManager from '@/components/ToastManager.vue'
-import Welcome from '@/components/Welcome.vue'
 import Vue from 'vue'
+
+import NavBar from '@/components/NavBar.vue'
+import Home from '@/components/Home.vue'
+import Swap from '@/components/Swap.vue'
+import ModalDialog from '@/components/dialog/Dialog.vue'
+import ToastManager from '@/components/ToastManager.vue'
 
 export default Vue.extend({
   name: 'App',
   components: {
+    ModalDialog,
     NavBar,
     Home,
     Swap,
-    Spinner,
-    ToastManager,
-    Welcome
+    ToastManager
   },
   computed: {
-    currentRouteComponent(): 'Swap' | 'Home' | 'Welcome' | 'Spinner' {
-      return this.$store.state.route.name === 'swap'
-        ? 'Swap'
-        : this.$store.state.route.name === 'welcome'
-        ? 'Welcome'
-        : this.$store.state.route.name === 'home'
-        ? 'Home'
-        : 'Spinner'
+    currentRouteComponent() {
+      return this.$store.state.route.type === 'swap' ? 'Swap' : 'Home'
     }
   }
 })
@@ -135,8 +128,4 @@ $mdc-theme-primary: $secondary;
     @include mdc-text-field-focused-outline-color($secondary);
   }
 }
-
-// .mdc-button {
-//   @include mdc-button-shape-radius($card-radii);
-// }
 </style>

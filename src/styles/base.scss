@@ -203,3 +203,19 @@ $transition-color: color 200ms $easing-standard;
 .fade-leave-to {
   opacity: 0;
 }
+
+// TODO Move this up to typography section
+.p {
+  margin: 0 0 10px 0;
+  color: $text-black-medium-emphasis;
+
+  &--emphasis {
+    font-weight: 500;
+  }
+
+  &--large {
+    font-size: 18px;
+    letter-spacing: 0.25px;
+    line-height: 24px;
+  }
+}
