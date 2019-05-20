@@ -1,6 +1,6 @@
 .DS_Store
 node_modules
-/dist
+dist
 
 # local env files
 .env.local
@@ -21,7 +21,7 @@ yarn-error.log*
 *.sw*
 
 # Electron-builder output
-/dist_electron
+dist_electron
 
 # Built icons
-/build
+build

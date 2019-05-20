@@ -5,7 +5,9 @@ import {
 } from 'vue-cli-plugin-electron-builder/lib'
 import path from 'path'
 import MenuBuilder from './menu'
-import ipc from 'electron-better-ipc'
+import { ipcMain } from 'electron-better-ipc'
+import { autoUpdater } from 'electron-updater'
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -15,7 +17,9 @@ let winClosing = false
 let shouldQuit = false
 
 // Standard scheme must be registered before the app is ready
-protocol.registerStandardSchemes(['app'], { secure: true })
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'app', privileges: { standard: true, secure: true } }
+])
 
 function createWindow() {
   win = new BrowserWindow({
@@ -25,7 +29,10 @@ function createWindow() {
     minHeight: 560,
     center: true,
     show: false,
-    icon: path.join(__static, 'icon.png')
+    icon: path.join(__static, 'icon.png'),
+    webPreferences: {
+      nodeIntegration: true
+    }
   })
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
@@ -47,7 +54,7 @@ function createWindow() {
       event.preventDefault()
       winClosing = true
 
-      ipc.callRenderer(win, 'before-window-close').finally(() => {
+      ipcMain.callRenderer(win, 'before-window-close').finally(() => {
         if (win) {
           win.close()
 
@@ -101,6 +108,10 @@ app.on('ready', async () => {
   }
 
   createWindow()
+
+  if (!isDevelopment) {
+    autoUpdater.checkForUpdatesAndNotify()
+  }
 })
 
 // Exit cleanly on request from parent process in development mode.
