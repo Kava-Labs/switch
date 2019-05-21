@@ -328,7 +328,7 @@ export default Vue.extend({
   &--btc {
     #{ $self }__front {
       background-image: url('~@/assets/lightning-logo.png');
-      background-position: left -25px top -55px;
+      background-position: left -30px top -55px;
       background-size: 260px;
     }
   }

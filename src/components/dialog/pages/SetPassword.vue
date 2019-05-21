@@ -10,6 +10,9 @@
     <p class="p p--emphasis">
       Funds may be unrecoverable if this password is lost or forgotten.
     </p>
+    <p class="p p--emphasis">
+      Kava cannot recover your password or private keys.
+    </p>
     <m-text-field
       id="set-password"
       v-model="$store.state.route.password"

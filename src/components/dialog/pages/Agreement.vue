@@ -4,7 +4,7 @@
       >Terms of Service</template
     >
     <section class="tos-wrapper">
-      <p class="p">Welcome to Switch!</p>
+      <p class="p p--large">Welcome to Switch!</p>
       <p class="p">
         Kava Labs, Inc (collectively "Kava Labs", "Kava", "we", "us", "our")
         provides services to you through its website located at https://kava.io
@@ -162,9 +162,20 @@ export default {
   box-sizing: border-box;
   overflow-y: auto;
   box-shadow: inset 0 0 8px gray;
-}
 
-.--emphasis {
-  font-weight: 500;
+  .p {
+    color: rgb(140, 140, 140);
+    font-size: 11pt;
+
+    &--large {
+      font-size: 18px;
+      letter-spacing: 0.25px;
+      line-height: 24px;
+    }
+  }
+
+  .--emphasis {
+    font-weight: 500;
+  }
 }
 </style>

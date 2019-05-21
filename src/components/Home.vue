@@ -83,7 +83,7 @@ export default Vue.extend({
 .card-container {
   max-width: $content-max-width;
   margin: auto;
-  padding: 20px 40px 40px 40px;
+  padding: 20px 40px 80px 40px;
   box-sizing: border-box;
   display: grid;
   grid-gap: 40px;

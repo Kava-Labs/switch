@@ -416,6 +416,11 @@ export default new Vuex.Store<State>({
         return
       }
 
+      if (password.length < 8) {
+        commit('SHOW_TOAST', 'Password must be greater than 8 characters')
+        return
+      }
+
       if (password !== password2) {
         commit('SHOW_TOAST', 'Passwords do not match')
         return

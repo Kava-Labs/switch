@@ -4,13 +4,15 @@
       >Unlock Switch</template
     >
     <p class="p">Enter your password to decrypt stored credentials and keys.</p>
+    <!-- TODO When attempting to initially focus this, really bizarre bug where sometimes
+    there's no "d" in the label until it's blurred and focused again...-->
     <m-text-field
       id="prompt-password"
       v-model="$store.state.route.password"
       class="password-field"
       outlined
       type="password"
-      autofocus
+      @keyup.enter="$store.dispatch('enterPassword')"
     >
       <m-floating-label for="prompt-password">Password</m-floating-label>
     </m-text-field>
