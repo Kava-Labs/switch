@@ -15,9 +15,9 @@
 
 </div>
 
-Switch is the fastest, most secure way to swap cryptocurrencies. Recent developments in blockchain scaling enable lightning-fast swaps, interoperability across blockchains, and complete self-custody of assets.
+Switch is an Interledger wallet enabling lightning-fast crypto swaps and complete self-custody of assets.
 
-Load funds onto "cards", easily swap between them, and unload when you're done. Only you have access to these funds and, thanks to streaming micropayments, even while trading you retain full asset custody!
+Load funds onto "cards," swap between them, and withdraw at your leisure. Only you have access to these funds, even while trading!
 
 ## Get Started
 
