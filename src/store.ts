@@ -171,16 +171,18 @@ export interface State {
 export const generateUplinkId = (uplink: ReadyUplinks) =>
   hmac(uplink.settlerType, uplink.credentialId)
 
+const mockRateApi = {
+  getPrice() {
+    throw new Error('Rate API not yet loaded')
+  },
+  async disconnect() {
+    throw new Error('Rate API not yet loaded')
+  }
+}
+
 export default new Vuex.Store<State>({
   state: {
-    rateApi: {
-      getPrice() {
-        throw new Error('Rate API not yet loaded')
-      },
-      async disconnect() {
-        throw new Error('Rate API not yet loaded')
-      }
-    },
+    rateApi: mockRateApi,
     ledgerEnv: null,
     route: {
       type: 'initial-load'
@@ -189,12 +191,17 @@ export default new Vuex.Store<State>({
     toasts: []
   },
   mutations: {
-    SETUP_API(state, sdk: IlpSdk) {
+    SETUP_SDK(state, sdk: IlpSdk) {
       state.sdk = sdk
       state.rateApi = sdk.state.rateBackend
     },
+    REMOVE_SDK(state) {
+      delete state.sdk
+      state.rateApi = mockRateApi
+    },
     REFRESH_UPLINKS(state) {
       if (!state.sdk) {
+        state.uplinks = []
         return
       }
 
@@ -481,6 +488,15 @@ export default new Vuex.Store<State>({
         type: 'connecting-sdk'
       })
 
+      // Disconnect the existing SDK, and persist the configuration first! (if switching modes)
+      if (state.sdk) {
+        await dispatch('persistConfig')
+        await state.sdk.disconnect()
+
+        commit('REMOVE_SDK')
+        commit('REFRESH_UPLINKS')
+      }
+
       let sdk: IlpSdk
       try {
         sdk = await connect(
@@ -498,7 +514,7 @@ export default new Vuex.Store<State>({
 
       log('Connected SDK. Reloading uplinks and proceeding with flow')
 
-      commit('SETUP_API', Object.freeze(sdk!))
+      commit('SETUP_SDK', Object.freeze(sdk!))
       commit('REFRESH_UPLINKS')
 
       commit('NAVIGATE_TO', {
