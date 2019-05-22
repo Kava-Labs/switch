@@ -1,6 +1,6 @@
 {
   "name": "switch",
-  "version": "0.3.0",
+  "version": "0.2.1",
   "description": "Interledger wallet enabling lightning-fast crypto swaps and complete self-custody of assets",
   "main": "background.js",
   "scripts": {
