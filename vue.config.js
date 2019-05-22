@@ -16,8 +16,7 @@ module.exports = {
           target: 'nsis'
         },
         mac: {
-          category: 'public.app-category.finance',
-          target: 'dmg'
+          category: 'public.app-category.finance'
         },
         linux: {
           category: 'Finance',

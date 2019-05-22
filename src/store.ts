@@ -6,18 +6,20 @@ import {
   ReadyUplinks,
   SettlementEngineType
 } from '@kava-labs/switch-api'
+import { CredentialConfigs } from '@kava-labs/switch-api/build/credential'
 import BigNumber from 'bignumber.js'
 import { createHmac } from 'crypto'
+import debug from 'debug'
+import { mkdir, readFile } from 'fs'
+import { homedir } from 'os'
+import { BehaviorSubject } from 'rxjs'
+import { decrypt, generateEncryptionKey } from 'symmetric-encrypt'
+import { promisify } from 'util'
 import Vue from 'vue'
 import Vuex from 'vuex'
-import { BehaviorSubject } from 'rxjs'
-import { CredentialConfigs } from '@kava-labs/switch-api/build/credential'
-import { homedir } from 'os'
-import { readFile, mkdir } from 'fs'
-import { promisify } from 'util'
 import writeFile from 'write-file-atomic'
-import { decrypt, generateEncryptionKey } from 'symmetric-encrypt'
-import debug from 'debug'
+import { ipcRenderer } from 'electron-better-ipc'
+import { UpdateInfo } from 'electron-updater'
 
 const log = debug('switch')
 
@@ -71,6 +73,10 @@ type Route =
       sourceUplink: string
       destinationUplink: string
       isStreaming: boolean
+    }
+  /** Loading screen while an update is being downloaded, blocking other navigations */
+  | {
+      type: 'update-in-progress'
     }
   /**
    * Loading screen while deciding which flow to use
@@ -325,7 +331,8 @@ export default new Vuex.Store<State>({
         'agreement',
         'set-password',
         'connecting-sdk',
-        'creating-uplink'
+        'creating-uplink',
+        'update-in-progress'
       ]
 
       if (prohibitedRoutes.includes(state.route.type)) {
@@ -340,6 +347,25 @@ export default new Vuex.Store<State>({
     async initialLoad({ state, commit, dispatch }) {
       if (state.route.type !== 'initial-load') {
         return
+      }
+
+      log('Checking for update')
+
+      const updateInfo = (await ipcRenderer.callMain(
+        'is-update-downloading'
+      )) as false | UpdateInfo
+      if (updateInfo) {
+        log('Update available:', updateInfo)
+        log('Navigating to update in progress screen')
+
+        commit('NAVIGATE_TO', {
+          type: 'update-in-progress'
+        })
+
+        // Prevent any further actions until app restarts
+        return
+      } else {
+        log('No update available; continuing with initial load')
       }
 
       log('Checking for config file')
@@ -483,6 +509,18 @@ export default new Vuex.Store<State>({
       log(`Persisted config file to ${CONFIG_PATH}`)
     },
 
+    async unloadSdk({ state, commit, dispatch }) {
+      if (!state.sdk) {
+        return
+      }
+
+      await dispatch('persistConfig')
+      await state.sdk.disconnect()
+
+      commit('REMOVE_SDK')
+      commit('REFRESH_UPLINKS')
+    },
+
     async loadSdk({ state, commit, dispatch }) {
       commit('NAVIGATE_TO', {
         type: 'connecting-sdk'
@@ -490,11 +528,7 @@ export default new Vuex.Store<State>({
 
       // Disconnect the existing SDK, and persist the configuration first! (if switching modes)
       if (state.sdk) {
-        await dispatch('persistConfig')
-        await state.sdk.disconnect()
-
-        commit('REMOVE_SDK')
-        commit('REFRESH_UPLINKS')
+        await dispatch('unloadSdk')
       }
 
       let sdk: IlpSdk

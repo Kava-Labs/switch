@@ -28,6 +28,7 @@ import Deposit from '@/components/dialog/pages/Deposit.vue'
 import Withdraw from '@/components/dialog/pages/Withdraw.vue'
 import EnterPassword from '@/components/dialog/pages/EnterPassword.vue'
 import SelectMode from '@/components/dialog/pages/SelectMode.vue'
+import AutoUpdate from '@/components/dialog/pages/AutoUpdate.vue'
 import { SettlementEngineType } from '@kava-labs/switch-api'
 import Vue from 'vue'
 
@@ -37,7 +38,7 @@ export default {
       // Default transition
       transitionName: 'zoom',
       // Default page
-      page: null
+      page: LoadingSpinner
     }
   },
   computed: {
@@ -86,7 +87,8 @@ export default {
               : null,
             'creating-uplink': LoadingSpinner,
             deposit: Deposit,
-            withdraw: Withdraw
+            withdraw: Withdraw,
+            'update-in-progress': AutoUpdate
           }[route.type] || null
       })
     }

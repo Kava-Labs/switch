@@ -71,6 +71,29 @@ function createWindow() {
 
   const menuBuilder = new MenuBuilder(win)
   menuBuilder.buildMenu()
+
+  ipcMain.answerRenderer('is-update-downloading', async () => {
+    if (isDevelopment) {
+      return false
+    }
+
+    const updateResult = await autoUpdater.checkForUpdatesAndNotify()
+
+    // An update is only being performed if there's a download promise
+    if (updateResult && updateResult.downloadPromise) {
+      // Restart the app after download completes
+      autoUpdater.on('update-downloaded', () => {
+        winClosing = true
+        shouldQuit = true
+        autoUpdater.quitAndInstall()
+      })
+
+      // Notify the renderer process that an update download is in progress
+      return JSON.parse(JSON.stringify(updateResult.updateInfo))
+    }
+
+    return false
+  })
 }
 
 app.on('before-quit', () => {
@@ -108,10 +131,6 @@ app.on('ready', async () => {
   }
 
   createWindow()
-
-  if (!isDevelopment) {
-    autoUpdater.checkForUpdatesAndNotify()
-  }
 })
 
 // Exit cleanly on request from parent process in development mode.

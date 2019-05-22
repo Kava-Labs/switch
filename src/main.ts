@@ -19,8 +19,8 @@ new Vue({
     this.$store.dispatch('initialLoad')
 
     ipcRenderer.answerMain('before-window-close', async () => {
-      await this.$store.state.sdk.disconnect()
-      await this.$store.dispatch('persistConfig')
+      // Persists config and disconnects SDK
+      await this.$store.dispatch('unloadSdk')
       return null
     })
   },
