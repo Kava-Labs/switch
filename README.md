@@ -23,7 +23,7 @@ Load funds onto "cards," swap between them, and withdraw at your leisure. Only y
 
 ### 1. Download Switch
 
-#### &raquo; [Mac](https://github.com/Kava-Labs/switch/releases/latest/download/Switch-0.2.0.dmg) | [Windows](https://github.com/Kava-Labs/switch/releases/latest/download/Switch.Setup.0.2.0.exe) | [Linux](https://github.com/Kava-Labs/switch/releases/latest/download/Switch.0.2.0.AppImage) &laquo;
+#### &raquo; [Mac](https://github.com/Kava-Labs/switch/releases/download/v0.2.1/Switch-mac-v0.2.1.dmg) | [Windows](https://github.com/Kava-Labs/switch/releases/download/v0.2.1/Switch-win-v0.2.1.exe) | [Linux](https://github.com/Kava-Labs/switch/releases/download/v0.2.1/Switch-linux-v0.2.1.AppImage) &laquo;
 
 Switch will prompt you whether you want to use testnet mode or mainnet mode. To get started, we suggest selecting testnet (you can always switch to mainnet mode later).
 
