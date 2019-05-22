@@ -47,80 +47,6 @@ export default class MenuBuilder {
   }
 
   buildTemplate(): MenuItemConstructorOptions[] {
-    let aboutSubMenu: MenuItemConstructorOptions[] = []
-    if (process.platform === 'darwin') {
-      aboutSubMenu = [
-        {
-          role: 'hide'
-        },
-        {
-          role: 'hideOthers'
-        },
-        {
-          role: 'unhide'
-        },
-        {
-          type: 'separator'
-        }
-      ]
-    }
-
-    aboutSubMenu.push({
-      role: 'quit'
-    })
-
-    const aboutMenu: MenuItemConstructorOptions = {
-      label: 'Switch',
-      submenu: aboutSubMenu
-    }
-
-    const editMenu: MenuItemConstructorOptions = {
-      label: 'Edit',
-      submenu: [
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        {
-          role: 'selectAll'
-        }
-      ]
-    }
-
-    const viewMenu: MenuItemConstructorOptions = {
-      label: 'View',
-      submenu: [
-        {
-          role: 'reload'
-        },
-        {
-          role: 'toggleFullScreen'
-        },
-        {
-          role: 'toggleDevTools'
-        }
-      ]
-    }
-
-    let windowSubMenu: MenuItemConstructorOptions[] = [
-      {
-        role: 'minimize'
-      },
-      { role: 'close' }
-    ]
-    if (process.platform === 'darwin') {
-      windowSubMenu.push({
-        type: 'separator'
-      })
-      windowSubMenu.push({
-        role: 'front'
-      })
-    }
-
-    const windowMenu: MenuItemConstructorOptions = {
-      label: 'Window',
-      submenu: windowSubMenu
-    }
-
     const helpMenu: MenuItemConstructorOptions = {
       label: 'Help',
       submenu: [
@@ -139,6 +65,16 @@ export default class MenuBuilder {
       ]
     }
 
-    return [aboutMenu, editMenu, viewMenu, windowMenu, helpMenu]
+    const isMac = process.platform === 'darwin'
+
+    return [
+      ...(isMac ? [{ role: 'appMenu' }] : []),
+      { role: 'fileMenu' },
+      { role: 'editMenu' },
+      { role: 'viewMenu' },
+      { role: 'windowMenu' },
+      helpMenu
+    ] as MenuItemConstructorOptions[]
+    // TODO Electron types weren't updated yet to support the default roles, so the have to be casted
   }
 }

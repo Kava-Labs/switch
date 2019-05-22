@@ -9,8 +9,23 @@ module.exports = {
       preProcessor: 'scss'
     },
     electronBuilder: {
-      appId: 'io.kava.switch',
-      productName: 'Switch',
+      builderOptions: {
+        appId: 'io.kava.switch',
+        productName: 'Switch',
+        win: {
+          target: 'nsis'
+        },
+        mac: {
+          category: 'public.app-category.finance'
+        },
+        linux: {
+          category: 'Finance',
+          packageCategory: 'wallet',
+          target: 'AppImage'
+        },
+        // Include ths OS so it's clearer which to download
+        artifactName: '${productName}-${os}-v${version}.${ext}'
+      },
       chainWebpackRendererProcess: config => {
         /**
          * When Webpack builds for the "electron-renderer" target, it prioritizes

@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section class="home-container">
     <transition-group name="list" class="card-container" tag="div">
       <div v-for="uplink in uplinks" :key="uplink.id" class="card">
         <uplink-card
@@ -12,23 +12,16 @@
         <add-uplink-card />
       </div>
     </transition-group>
-    <portal to="dialog">
-      <transition name="prompt" mode="out-in" appear>
-        <component :is="metaRoute" :route-info="routeInfo" />
-      </transition>
-    </portal>
   </section>
 </template>
 
 <script lang="ts">
+import Vue from 'vue'
+import { mapState, mapGetters } from 'vuex'
+import { Uplink } from '@/store'
+
 import AddUplinkCard from '@/components/card/AddUplinkCard.vue'
 import UplinkCard from '@/components/card/UplinkCard.vue'
-import { mapState, mapGetters } from 'vuex'
-import Vue from 'vue'
-import { Uplink, HomeRoute } from '@/store'
-import DepositDialog from '@/components/home/DepositDialog.vue'
-import WithdrawDialog from '@/components/home/WithdrawDialog.vue'
-import ConfigDialog from '@/components/home/ConfigDialog.vue'
 
 export default Vue.extend({
   components: {
@@ -36,15 +29,15 @@ export default Vue.extend({
     UplinkCard
   },
   props: {
-    routeInfo: {
+    route: {
       required: true,
-      type: Object as () => HomeRoute
+      type: Object
     }
   },
   computed: {
     selectedSourceUplink(): string | null {
-      return this.routeInfo.meta === 'select-destination-uplink'
-        ? this.routeInfo.selectedSourceUplink
+      return this.route.type === 'select-dest-uplink'
+        ? this.route.selectedSourceUplink
         : null
     },
     ...(mapState(['uplinks']) as {
@@ -64,32 +57,19 @@ export default Vue.extend({
         }),
         {}
       )
-    },
-    metaRoute():
-      | typeof DepositDialog
-      | typeof WithdrawDialog
-      | typeof ConfigDialog
-      | null {
-      return this.routeInfo.meta === 'deposit'
-        ? DepositDialog
-        : this.routeInfo.meta === 'withdrawal'
-        ? WithdrawDialog
-        : this.routeInfo.meta === 'config'
-        ? ConfigDialog
-        : null
     }
   },
   methods: {
+    // TODO Move this to Vuex store?
     selectUplink(id: string) {
       if (!this.selectedSourceUplink) {
         this.$store.commit('NAVIGATE_TO', {
-          name: 'home',
-          meta: 'select-destination-uplink',
+          type: 'select-dest-uplink',
           selectedSourceUplink: id
         })
       } else {
         this.$store.commit('NAVIGATE_TO', {
-          name: 'swap',
+          type: 'swap',
           sourceUplink: this.selectedSourceUplink,
           destinationUplink: id
         })
@@ -103,7 +83,7 @@ export default Vue.extend({
 .card-container {
   max-width: $content-max-width;
   margin: auto;
-  padding: 20px 40px 40px 40px;
+  padding: 20px 40px 80px 40px;
   box-sizing: border-box;
   display: grid;
   grid-gap: 40px;

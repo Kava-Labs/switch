@@ -14,8 +14,7 @@ export default {
   methods: {
     configNewUplink() {
       this.$store.commit('NAVIGATE_TO', {
-        name: 'home',
-        meta: 'config'
+        type: 'select-asset'
       })
     }
   }

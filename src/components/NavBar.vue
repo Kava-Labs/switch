@@ -14,10 +14,11 @@
       <img class="header__nav__logo" src="@/assets/switch-logo.svg" />
       <transition name="fade" mode="out-in" appear>
         <div
-          v-if="ledgerEnv"
+          v-if="showModeBadge"
           class="header__nav__badge"
           :class="`header__nav__badge--${ledgerEnv}`"
-          @click="selectMode"
+          title="Toggle mode"
+          @click="toggleMode"
         >
           {{ ledgerEnv }}
         </div>
@@ -46,33 +47,41 @@ import { LedgerEnv } from '@kava-labs/switch-api'
 export default {
   computed: {
     showSelectDestBar() {
-      return (
-        this.$store.state.route.name === 'home' &&
-        this.$store.state.route.selectedSourceUplink
-      )
+      return this.$store.state.route.type === 'select-dest-uplink'
     },
     showBackButton() {
       return (
-        this.$store.state.route.name === 'swap' &&
+        this.$store.state.route.type === 'swap' &&
         !this.$store.state.route.isStreaming
       )
+    },
+    showModeBadge() {
+      return this.ledgerEnv && this.$store.state.route.type !== 'connecting-sdk'
     },
     ledgerEnv() {
       return this.$store.state.ledgerEnv
     }
   },
   methods: {
-    selectMode() {
+    toggleMode() {
+      // Show loading screen
       this.$store.commit('NAVIGATE_TO', {
-        name: 'welcome'
+        type: 'select-mode'
       })
+
+      // Toggle the mode
+      this.$store.dispatch(
+        'setMode',
+        this.$store.state.ledgerEnv === LedgerEnv.Testnet
+          ? LedgerEnv.Mainnet
+          : LedgerEnv.Testnet
+      )
     },
     cancelSwap() {
       const route = this.$store.state.route
       if (route.name !== 'swap' || !route.isStreaming) {
         this.$store.commit('NAVIGATE_TO', {
-          name: 'home',
-          selectedSourceUplink: null
+          type: 'home'
         })
       }
     }
@@ -137,9 +146,6 @@ $mdc-theme-primary: white;
       color: $secondary;
       user-select: none;
       cursor: pointer;
-      transition-property: color, border-color;
-      transition-duration: 200ms;
-      transition-timing-function: $easing-standard;
 
       &--mainnet {
         color: $mainnet-accent;

@@ -1,9 +1,8 @@
 import Vue from 'vue'
 import App from '@/components/App.vue'
 import store from '@/store'
-import ipc from 'electron-better-ipc'
+import { ipcRenderer } from 'electron-better-ipc'
 
-import PortalVue from 'portal-vue'
 import Button from 'material-components-vue/dist/button'
 import IconButton from 'material-components-vue/dist/icon-button'
 import TextField from 'material-components-vue/dist/text-field'
@@ -13,13 +12,16 @@ Vue.use(Button)
 Vue.use(IconButton)
 Vue.use(TextField)
 Vue.use(FloatingLabel)
-Vue.use(PortalVue)
 
 new Vue({
   store,
-  mounted() {
-    ipc.answerMain('before-window-close', () => {
-      return this.$store.state.api.disconnect()
+  async mounted() {
+    this.$store.dispatch('initialLoad')
+
+    ipcRenderer.answerMain('before-window-close', async () => {
+      // Persists config and disconnects SDK
+      await this.$store.dispatch('unloadSdk')
+      return null
     })
   },
   render: h => h(App)

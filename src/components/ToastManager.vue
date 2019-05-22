@@ -18,7 +18,7 @@
   display: flex;
   flex-flow: column nowrap;
   align-items: flex-end;
-  position: absolute;
+  position: fixed;
   overflow: hidden;
   z-index: 30;
   bottom: 0;

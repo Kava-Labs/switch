@@ -3,20 +3,20 @@
     <span class="swap__source-header">Send</span>
     <span class="swap__destination-header">Receive</span>
     <UplinkCard
-      :key="`uplink-${routeInfo.sourceUplink}`"
+      :key="`uplink-${route.sourceUplink}`"
       class="swap__source-uplink"
       :uplink="sourceUplink"
       display="static"
     />
     <UplinkCard
-      :key="`uplink-${routeInfo.destinationUplink}`"
+      :key="`uplink-${route.destinationUplink}`"
       class="swap__destination-uplink"
       :uplink="destinationUplink"
       display="static"
     />
     <img
       class="swap__interledger-logo"
-      :class="{ 'swap__interledger-logo--spin': routeInfo.isStreaming }"
+      :class="{ 'swap__interledger-logo--spin': route.isStreaming }"
       src="~@/assets/interledger-logo.svg"
     />
     <div class="swap__source-pipe">
@@ -54,7 +54,7 @@
       @input="handleDestAmountInput"
     />
     <transition name="fade" mode="out-in" appear>
-      <div v-if="!routeInfo.isStreaming" class="swap__actions">
+      <div v-if="!route.isStreaming" class="swap__actions">
         <m-button
           class="swap__actions__go-button"
           outlined
@@ -88,13 +88,13 @@ import Vue from 'vue'
 import { from } from 'rxjs'
 import { pairwise, filter, takeUntil } from 'rxjs/operators'
 
-const MAX_TRADE_SIZE = usd(10)
+const MAX_TRADE_SIZE = usd(20)
 const MAX_SLIPPAGE = 0.99
 
 export default {
   components: { UplinkCard, AmountInput },
   props: {
-    routeInfo: {
+    route: {
       type: Object,
       required: true
     }
@@ -111,12 +111,12 @@ export default {
   computed: {
     sourceUplink() {
       return this.$store.state.uplinks.find(
-        uplink => uplink.id === this.routeInfo.sourceUplink
+        uplink => uplink.id === this.route.sourceUplink
       )
     },
     destinationUplink() {
       return this.$store.state.uplinks.find(
-        uplink => uplink.id === this.routeInfo.destinationUplink
+        uplink => uplink.id === this.route.destinationUplink
       )
     },
     sourceUnit() {
@@ -135,7 +135,7 @@ export default {
             convert(
               this.sourceUnit(this.sourceAmount),
               usd(),
-              this.$store.getters.rateApi
+              this.$store.state.rateApi
             ).toFixed(2, BigNumber.ROUND_CEIL)
         : null
     },
@@ -159,14 +159,14 @@ export default {
   },
   methods: {
     flipUplinks() {
-      if (this.routeInfo.isStreaming) {
+      if (this.route.isStreaming) {
         return
       }
 
       this.$store.commit('NAVIGATE_TO', {
-        name: 'swap',
-        sourceUplink: this.routeInfo.destinationUplink,
-        destinationUplink: this.routeInfo.sourceUplink
+        type: 'swap',
+        sourceUplink: this.route.destinationUplink,
+        destinationUplink: this.route.sourceUplink
       })
 
       // TODO Oh my God, please don't do this
@@ -184,15 +184,15 @@ export default {
       }
 
       // Prevent multiple streams simultaneously
-      if (this.routeInfo.isStreaming) {
+      if (this.route.isStreaming) {
         return
       }
       this.$store.commit('NAVIGATE_TO', {
-        ...this.routeInfo,
+        ...this.route,
         isStreaming: true
       })
 
-      const streamComplete = this.$store.state.api
+      const streamComplete = this.$store.state.sdk
         .streamMoney({
           amount: new BigNumber(this.sourceAmount),
           source: this.sourceUplink.getInternal(),
@@ -206,7 +206,7 @@ export default {
         })
         .finally(() => {
           this.$store.commit('NAVIGATE_TO', {
-            ...this.routeInfo,
+            ...this.route,
             isStreaming: false
           })
 
@@ -259,7 +259,7 @@ export default {
     },
     // TODO Abstract some of this code !
     handleSourceAmountInput(input, showToast = true) {
-      if (this.routeInfo.isStreaming) {
+      if (this.route.isStreaming) {
         this.sourceAmount = this.sourceAmount
         return
       }
@@ -282,7 +282,7 @@ export default {
       const exchangeRate = convert(
         this.sourceUnit(),
         this.destinationUnit(),
-        this.$store.getters.rateApi
+        this.$store.state.rateApi
       )
 
       let showTradeLimitToast = false
@@ -297,7 +297,9 @@ export default {
       const reverseExchangeRate = new BigNumber(1).dividedBy(exchangeRate)
 
       // Calculate the max destination amount and reduce all values
-      const maxDestAmount = this.destinationUplink.incomingCapacity$.value
+      const maxDestAmount = this.destinationUplink.incomingCapacity$.value.times(
+        MAX_SLIPPAGE
+      )
       if (destAmount.isGreaterThan(maxDestAmount)) {
         showIncomingCapacityToast = true
 
@@ -314,7 +316,7 @@ export default {
       const tradeLimit = convert(
         MAX_TRADE_SIZE,
         this.sourceUnit(),
-        this.$store.getters.rateApi
+        this.$store.state.rateApi
       )
       const maxSourceAmount = BigNumber.min(outgoingCapacity, tradeLimit)
       if (sourceAmount.isGreaterThan(maxSourceAmount)) {
@@ -332,7 +334,7 @@ export default {
       // Show relevant toasts
       if (showToast) {
         if (showTradeLimitToast) {
-          this.$store.commit('SHOW_TOAST', 'Maximum swap amount is $10')
+          this.$store.commit('SHOW_TOAST', 'Maximum swap amount is $20')
         } else if (showOutgoingCapacityToast) {
           this.$store.commit(
             'SHOW_TOAST',
@@ -369,7 +371,7 @@ export default {
       }
     },
     handleDestAmountInput(input, showToast = true) {
-      if (this.routeInfo.isStreaming) {
+      if (this.route.isStreaming) {
         this.destAmount = this.destAmount
         return
       }
@@ -391,7 +393,7 @@ export default {
       const exchangeRate = convert(
         this.sourceUnit(),
         this.destinationUnit(),
-        this.$store.getters.rateApi
+        this.$store.state.rateApi
       )
       const reverseExchangeRate = new BigNumber(1).dividedBy(exchangeRate)
 
@@ -407,7 +409,9 @@ export default {
       let showOutgoingCapacityToast = false
 
       // Calculate the max destination amount and reduce all values
-      const maxDestAmount = this.destinationUplink.incomingCapacity$.value
+      const maxDestAmount = this.destinationUplink.incomingCapacity$.value.times(
+        MAX_SLIPPAGE
+      )
       if (destAmount.isGreaterThan(maxDestAmount)) {
         showIncomingCapacityToast = true
 
@@ -424,7 +428,7 @@ export default {
       const tradeLimit = convert(
         MAX_TRADE_SIZE,
         this.sourceUnit(),
-        this.$store.getters.rateApi
+        this.$store.state.rateApi
       )
       const maxSourceAmount = BigNumber.min(
         outgoingCapacity,
@@ -446,7 +450,7 @@ export default {
       // Show relevant toasts
       if (showToast) {
         if (showTradeLimitToast) {
-          this.$store.commit('SHOW_TOAST', 'Maximum swap amount is $10')
+          this.$store.commit('SHOW_TOAST', 'Maximum swap amount is $20')
         } else if (showOutgoingCapacityToast) {
           this.$store.commit(
             'SHOW_TOAST',
@@ -522,28 +526,27 @@ export default {
     grid-area: connector;
     align-self: center;
     justify-self: center;
-    filter: drop-shadow(0 0 8px rgba(40, 51, 75, 0.35));
+    filter: drop-shadow(0 0 6px rgba(40, 51, 75, 0.55));
     user-select: none;
     -webkit-user-drag: none;
     position: relative;
     z-index: 4;
-    // transform-origin: center;
     transform-style: preserve-3d;
 
-    &--spin {
-      @keyframes spin {
-        from {
-          transform: rotate(0deg);
-          // filter: rotate(0deg);
-        }
-
-        to {
-          transform: rotate(360deg);
-          // filter: rotate(360deg);
-        }
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
       }
 
-      animation: spin 500ms linear infinite forwards;
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    animation: spin 400ms linear infinite forwards paused;
+
+    &--spin {
+      animation-play-state: running;
     }
   }
 
