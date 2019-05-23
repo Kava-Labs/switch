@@ -41,8 +41,7 @@ Switch will prompt you to securely deposit funds onto your cards as you add them
 
 Select a card to send, then click "Swap" and choose a card to receive. Enter the desired amount, and exchange crypto in seconds!
 
-![Screenshot Home](./screenshots/home-eth-btc-xrp.png)
-![Screenshot Swap](./screenshots/swap-xrp-eth-success.png)
+![Demo of XRP to ETH swap](./screenshots/swap-xrp-eth.gif)
 
 ## How It Works
 
@@ -59,8 +58,11 @@ If at any point the connector stops sending or sends us too little of the destin
 For this beta release, Switch uses a connector operated by Kava. But coming soon, we'll roll out support for user-defined connectors, and all the tools, infrastructure, and docs necessary to operate one yourself.
 
 ### [FAQs](docs/faqs.md)
+
 ### [How to setup swaps on Lightning](docs/lightning-setup.md)
+
 ### [What is layer 2? What are payment channels?](docs/faqs.md#what-is-layer-2-and-payment-channels)
+
 ### [What is Interledger?](docs/faqs.md#what-is-interledger)
 
 ## Developer Installation
