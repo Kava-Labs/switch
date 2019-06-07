@@ -28,15 +28,16 @@
 .toast {
   max-width: 400px;
   min-width: 300px;
-  height: 48px;
   margin: 20px 0 0 0;
-  padding: 0 20px;
+  padding: 14px 20px;
   border-radius: 24px;
   box-sizing: border-box;
   background: $primary-900;
-  line-height: 48px;
   color: $text-white-high-emphasis;
   box-shadow: $card-shadow;
+  line-height: 12pt;
+  display: flex;
+  align-items: center;
 }
 
 .stack-move {

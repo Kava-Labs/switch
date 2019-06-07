@@ -5,15 +5,15 @@
     >
     <main>
       <p class="p">
-        Deposit funds onto your card to enable instant streaming swaps.
-        (Required to both send and receive using this card).
+        To use this as the sending asset for streaming swaps, deposit funds onto
+        your card.
       </p>
       <p class="p p--emphasis">Only you have access to these funds.</p>
       <amount-input
         class="amount-input"
         :amount="depositAmount"
         :amount-usd="helperText"
-        :asset-code="uplink.unit().symbol"
+        :asset-code="uplink.unit.symbol"
         :focused="true"
         @input="handleDepositAmountInput"
       />
@@ -30,16 +30,32 @@ import Vue from 'vue'
 import BigNumber from 'bignumber.js'
 import AmountInput from '@/components/AmountInput.vue'
 import DialogContent from '@/components/dialog/DialogContent.vue'
-import { convert, usd } from '@kava-labs/crypto-rate-utils'
+import {
+  convert,
+  exchangeQuantity,
+  exchangeUnit
+} from '@kava-labs/crypto-rate-utils'
+import debug from 'debug'
 
-const MAX_DEPOSIT_AMOUNT = usd(100)
-const MIN_DEPOSIT_AMOUNT = usd(0.99)
+const log = debug('switch')
+
+const getAssetScale = uplink =>
+  Math.abs(uplink.unit.exchangeScale - uplink.unit.accountScale)
+
+const usd = exchangeUnit({
+  symbol: 'USD',
+  exchangeScale: 2,
+  accountScale: 2,
+  scale: 2
+})
+
+const MAX_DEPOSIT_AMOUNT = exchangeQuantity(usd, 100)
 
 export default {
   components: { AmountInput, DialogContent },
   data() {
     return {
-      depositAmount: null,
+      depositAmount: '',
       feeEstimate: null
     }
   },
@@ -60,27 +76,27 @@ export default {
       }
 
       const usdAmount = convert(
-        this.uplink.unit(this.depositAmount),
-        usd(),
+        exchangeQuantity(this.uplink.unit, this.depositAmount),
+        usd,
         this.$store.state.rateApi
-      ).toFixed(2, BigNumber.ROUND_CEIL)
+      ).amount.toFixed(2, BigNumber.ROUND_CEIL)
 
-      const feeEstimate = convert(
-        this.uplink.unit(this.feeEstimate),
-        usd(),
+      const feeEstimateAmount = convert(
+        this.feeEstimate,
+        usd,
         this.$store.state.rateApi
-      ).toFixed(4, BigNumber.ROUND_CEIL)
+      ).amount.toFixed(4, BigNumber.ROUND_CEIL)
 
-      return '$' + usdAmount + ' + $' + feeEstimate + ' fee*'
+      return `$${usdAmount} + $${feeEstimateAmount} fee*`
     }
   },
   async created() {
     // Generate a fee esimate as if we were depositing
     const amount = convert(
-      usd(1),
-      this.uplink.unit(),
+      exchangeQuantity(usd, 1),
+      this.uplink.unit,
       this.$store.state.rateApi
-    ).decimalPlaces(this.uplink.unit().exchangeUnit, BigNumber.ROUND_DOWN)
+    ).amount.decimalPlaces(this.uplink.unit.exchangeScale, BigNumber.ROUND_DOWN)
 
     this.feeEstimate = await new Promise((resolve, reject) => {
       this.$store.state.sdk
@@ -94,15 +110,19 @@ export default {
         })
         .then(reject, reject)
     }).catch(err => {
-      this.$store.commit('SHOW_TOAST', 'Failed to estimate fee for deposit')
-      this.cancelDeposit()
+      log('Failed to estimate fee for deposit:', err)
+      this.$store.commit(
+        'SHOW_TOAST',
+        'Failed to calculate fee. Deposit may fail due to insufficient funds'
+      )
+      return null
     })
   },
   methods: {
     handleDepositAmountInput(input) {
       // Allow the fields to be cleared
       if (input.length === 0) {
-        this.depositAmount = null
+        this.depositAmount = ''
       }
 
       // Ensure correct formatting & positive
@@ -117,9 +137,9 @@ export default {
       // Calculate max source amount and reduce all values
       const maxDeposit = convert(
         MAX_DEPOSIT_AMOUNT,
-        this.uplink.unit(),
+        this.uplink.unit,
         this.$store.state.rateApi
-      )
+      ).amount
       if (depositAmount.isGreaterThan(maxDeposit)) {
         this.$store.commit('SHOW_TOAST', 'Maximum deposit is $100')
         depositAmount = maxDeposit
@@ -128,7 +148,7 @@ export default {
       // Truncate the amounts
       // (Must be done last so have full precision to convert between them)
       depositAmount = depositAmount.decimalPlaces(
-        this.uplink.assetScale,
+        getAssetScale(this.uplink),
         BigNumber.ROUND_DOWN
       )
 
@@ -139,16 +159,6 @@ export default {
     },
     acceptDeposit() {
       if (new BigNumber(this.depositAmount).isZero()) {
-        return
-      }
-
-      const minDeposit = convert(
-        MIN_DEPOSIT_AMOUNT,
-        this.uplink.unit(),
-        this.$store.state.rateApi
-      )
-      if (new BigNumber(this.depositAmount).isLessThan(minDeposit)) {
-        this.$store.commit('SHOW_TOAST', 'Minimum deposit is $1')
         return
       }
 

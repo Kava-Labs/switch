@@ -28,7 +28,7 @@ export default {
     },
     amount: {
       required: true,
-      validator: value => typeof value === 'string' || value === null
+      type: String
     },
     amountUsd: {
       default: undefined,

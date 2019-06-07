@@ -1,15 +1,15 @@
 <template>
   <dialog-content>
     <template v-slot:header
-      >Add Ethereum</template
+      >Add {{ $store.state.route.config.assetType }}</template
     >
     <p v-if="$store.getters.isMainnet" class="p">
       Configure a new card with an Ethereum account. After, you'll have the
       option to fund the card.
     </p>
     <p v-else class="p">
-      Configure a new card with a Kovan testnet account. After, you'll have the
-      option to fund the card.
+      Configure a new card with a Kovan testnet Ethereum account. After, you'll
+      have the option to fund the card.
     </p>
     <m-text-field
       id="eth-private-key"

@@ -24,7 +24,21 @@
 import Vue from 'vue'
 import BigNumber from 'bignumber.js'
 import DialogContent from '@/components/dialog/DialogContent.vue'
-import { convert, usd } from '@kava-labs/crypto-rate-utils'
+import {
+  convert,
+  exchangeUnit,
+  exchangeQuantity
+} from '@kava-labs/crypto-rate-utils'
+import debug from 'debug'
+
+const log = debug('switch')
+
+const usd = exchangeUnit({
+  symbol: 'USD',
+  exchangeScale: 2,
+  accountScale: 2,
+  scale: 2
+})
 
 export default {
   components: { DialogContent },
@@ -42,13 +56,13 @@ export default {
     usdFeeEstimate() {
       return !this.feeEstimate
         ? null
-        : this.feeEstimate.isZero()
+        : this.feeEstimate.amount.isZero()
         ? '0'
         : convert(
-            this.uplink.unit(this.feeEstimate),
-            usd(),
+            this.feeEstimate,
+            usd,
             this.$store.state.rateApi
-          ).toFixed(4, BigNumber.ROUND_CEIL)
+          ).amount.toFixed(4, BigNumber.ROUND_CEIL)
     }
   },
   async created() {
@@ -64,7 +78,11 @@ export default {
         })
         .then(reject, reject)
     }).catch(err => {
-      this.$store.commit('SHOW_TOAST', 'Failed to estimate fee for withdrawal')
+      log('Failed to estimate fee for withdrawal:', err)
+      this.$store.commit(
+        'SHOW_TOAST',
+        'Failed to calculate fee. Withdraw may fail if on-chain funds are insufficient'
+      )
       this.cancelWithdrawal()
     })
   },

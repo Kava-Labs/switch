@@ -1,7 +1,7 @@
 <p align="center">
   <img src="./src/assets/switch-logo.svg" width="220">
 </p>
-<h3 align="center">💸&ensp;Swap BTC, ETH, XRP in seconds. Keep your private keys private. 🔒</h3>
+<h3 align="center">💸&ensp;Swap BTC, ETH, DAI and XRP in seconds. Keep your private keys private. 🔒</h3>
 
 ![Switch swap screen cropped](./screenshots/swap-eth-btc-cropped.png)
 
@@ -29,9 +29,9 @@ Switch will prompt you whether you want to use testnet mode or mainnet mode. To 
 
 ### 2. Add cards
 
-Add and deposit to a minimum of two cards to enable swapping. ETH and XRP are the easiest to get started.
+Add and deposit to a minimum of two cards to enable swapping. To get started, we recommend ETH and XRP:
 
-- **ETH**: Add an Ethereum card using a private key. You can generate a private key and address [here](https://vanity-eth.tk). Then, load the address with testnet ether from [the Kovan testnet faucet](https://faucet.kovan.network/).
+- **ETH**, **DAI**: Add an Ethereum card using a private key. You can generate a private key and address [here](https://vanity-eth.tk). Then, load the address with testnet ether from [the Kovan testnet faucet](https://faucet.kovan.network/).
 - **XRP**: Add an XRP card using a XRP secret. If you don't have a testnet account, generate a prefunded account and secret from [the XRP testnet faucet](https://developers.ripple.com/xrp-test-net-faucet.html).
 - **BTC**: To add a Lightning card, follow these [instructions](docs/lightning-setup.md).
 
@@ -78,9 +78,9 @@ For this beta release, Switch uses a connector operated by Kava. But coming soon
 
 - [x] Integration of the top three cryptocurrencies
 - [x] Mainnet
+- [x] Cards for ERC-20 tokens, such as DAI
 - [ ] Custom connectors
 - [ ] Peer-to-peer payments
-- [ ] Cards for ERC-20 tokens, such as Dai
 
 ## License
 

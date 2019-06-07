@@ -1,4 +1,4 @@
-import { AssetUnit, RateApi } from '@kava-labs/crypto-rate-utils'
+import { AssetUnit, RateApi, exchangeUnit } from '@kava-labs/crypto-rate-utils'
 import {
   connect,
   IlpSdk,
@@ -6,7 +6,7 @@ import {
   ReadyUplinks,
   SettlementEngineType
 } from '@kava-labs/switch-api'
-import { CredentialConfigs } from '@kava-labs/switch-api/build/credential'
+import { UplinkConfigs } from '@kava-labs/switch-api'
 import BigNumber from 'bignumber.js'
 import { createHmac } from 'crypto'
 import debug from 'debug'
@@ -39,11 +39,12 @@ const hmac = (key: string, message: string) =>
 
 export interface Uplink {
   id: string
-  unit: (amount?: BigNumber.Value) => AssetUnit
-  assetScale: number
+  unit: AssetUnit
   balance$: BehaviorSubject<BigNumber>
   incomingCapacity$: BehaviorSubject<BigNumber>
   outgoingCapacity$: BehaviorSubject<BigNumber>
+  availableToSend$: BehaviorSubject<BigNumber>
+  availableToReceive$: BehaviorSubject<BigNumber>
   totalSent$: BehaviorSubject<BigNumber>
   totalReceived$: BehaviorSubject<BigNumber>
   activeDeposit: null | Promise<void>
@@ -73,6 +74,10 @@ type Route =
       sourceUplink: string
       destinationUplink: string
       isStreaming: boolean
+    }
+  /** If no outgoing capacity *and* no incoming capacity, inform user before swap */
+  | {
+      type: 'capacity-alert'
     }
   /** Loading screen while an update is being downloaded, blocking other navigations */
   | {
@@ -140,7 +145,7 @@ type Route =
   /** Configure credentials for a new card */
   | {
       type: 'config-credential'
-      config: CredentialConfigs
+      config: UplinkConfigs
     }
   /** Loading spinner while creating new card */
   | {
@@ -175,7 +180,7 @@ export interface State {
 }
 
 export const generateUplinkId = (uplink: ReadyUplinks) =>
-  hmac(uplink.settlerType, uplink.credentialId)
+  hmac(uplink.settlerType, hmac(uplink.asset.symbol, uplink.credentialId))
 
 const mockRateApi = {
   getPrice() {
@@ -213,17 +218,16 @@ export default new Vuex.Store<State>({
 
       state.uplinks = state.sdk.state.uplinks.map(uplink => {
         const id = generateUplinkId(uplink)
-        const settler = state.sdk!.state.settlers[uplink.settlerType]
-
         const existingUplink = state.uplinks.find(uplink => uplink.id === id)
 
         return {
           id,
-          unit: settler.exchangeUnit,
-          assetScale: settler.assetScale,
+          unit: exchangeUnit(uplink.asset),
           balance$: uplink.balance$,
           incomingCapacity$: uplink.incomingCapacity$,
           outgoingCapacity$: uplink.outgoingCapacity$,
+          availableToSend$: uplink.availableToSend$,
+          availableToReceive$: uplink.availableToReceive$,
           totalSent$: uplink.totalSent$,
           totalReceived$: uplink.totalReceived$,
           getInternal: () => uplink,
@@ -231,8 +235,8 @@ export default new Vuex.Store<State>({
           activeWithdrawal: existingUplink
             ? existingUplink.activeWithdrawal
             : null,
-          canDeposit: ['ETH', 'XRP'].includes(settler.assetCode),
-          canWithdraw: ['ETH', 'XRP'].includes(settler.assetCode)
+          canDeposit: uplink.asset.symbol !== 'BTC',
+          canWithdraw: uplink.asset.symbol !== 'BTC'
         }
       })
     },
@@ -510,7 +514,8 @@ export default new Vuex.Store<State>({
     },
 
     async unloadSdk({ state, commit, dispatch }) {
-      if (!state.sdk) {
+      const isSwapping = state.route.type === 'swap' && state.route.isStreaming
+      if (!state.sdk || isSwapping) {
         return
       }
 
@@ -596,6 +601,22 @@ export default new Vuex.Store<State>({
         type: 'config-credential',
         config: {
           settlerType: SettlementEngineType.Machinomy,
+          assetType: 'ETH',
+          privateKey: ''
+        }
+      })
+    },
+
+    selectDai({ state, commit }) {
+      if (state.route.type !== 'select-asset') {
+        return
+      }
+
+      commit('NAVIGATE_TO', {
+        type: 'config-credential',
+        config: {
+          settlerType: SettlementEngineType.Machinomy,
+          assetType: 'DAI',
           privateKey: ''
         }
       })
@@ -705,6 +726,37 @@ export default new Vuex.Store<State>({
       commit('NAVIGATE_TO', {
         type: 'home'
       })
+    },
+
+    selectUplinkToSwap({ state, commit }, id: string) {
+      if (state.route.type === 'home') {
+        commit('NAVIGATE_TO', {
+          type: 'select-dest-uplink',
+          selectedSourceUplink: id
+        })
+      } else if (state.route.type === 'select-dest-uplink') {
+        // Check if the receiving card has sufficient capacity first
+        const destUplink = state.uplinks.find(uplink => uplink.id === id)
+        if (!destUplink) {
+          return
+        }
+
+        const showCapacityGuidance =
+          destUplink.outgoingCapacity$.value.isZero() &&
+          destUplink.incomingCapacity$.value.isZero()
+        if (showCapacityGuidance) {
+          commit('NAVIGATE_TO', {
+            type: 'capacity-alert'
+          })
+          return
+        }
+
+        commit('NAVIGATE_TO', {
+          type: 'swap',
+          sourceUplink: state.route.selectedSourceUplink,
+          destinationUplink: id
+        })
+      }
     }
   },
   getters: {

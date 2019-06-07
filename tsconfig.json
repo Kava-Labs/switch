@@ -14,6 +14,8 @@
     "lib": ["esnext", "dom"],
     "skipLibCheck": true, // TODO Remove this!
     "pretty": true,
-    "outDir": "dist_electron"
+    "outDir": "dist_electron",
+    // Recommended per https://vuejs.github.io/vetur/setup.html#project-setup:
+    "allowJs": true
   }
 }

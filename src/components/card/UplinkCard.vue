@@ -16,7 +16,7 @@
         <div class="card__front__balance" :title="balanceTooltip">
           <div class="card__front__balance__amount">{{ balance }}</div>
           <div class="card__front__balance__asset-code">
-            {{ uplink.unit().symbol }}
+            {{ uplink.unit.symbol }}
           </div>
         </div>
         <img class="card__front__connector-icon" src="@/assets/kava-logo.svg" />
@@ -97,23 +97,26 @@ export default Vue.extend({
        */
       maxDigits:
         ({
-          XRP: 6,
-          BTC: 9,
-          ETH: 9
+          XRP: 6
         } as {
           [symbol: string]: number
-        })[this.uplink.unit().symbol] || 6
+        })[this.uplink.unit.symbol] || 9,
+      decimalPlaces: ({
+        DAI: 3
+      } as {
+        [symbol: string]: number
+      })[this.uplink.unit.symbol]
     }
   },
   computed: {
     /** Should a dark theme be applied to the buttons? */
     darkTheme(): boolean {
-      return this.uplink.unit().symbol === 'XRP'
+      return ['XRP', 'DAI'].includes(this.uplink.unit.symbol)
     },
 
     /** Add styling unique to this card (color, background image) */
     assetClass(): string {
-      return 'card--' + this.uplink.unit().symbol.toLowerCase()
+      return 'card--' + this.uplink.unit.symbol.toLowerCase()
     },
 
     /**
@@ -123,7 +126,10 @@ export default Vue.extend({
     balance(): string {
       const truncatedBalance = this.uplink.balance$.value
         // toFixed() will leave trailing zeros, but decimalPlaces *then* toString won't
-        .decimalPlaces(this.uplink.unit().unit, BigNumber.ROUND_DOWN)
+        .decimalPlaces(
+          this.decimalPlaces || this.uplink.unit.scale,
+          BigNumber.ROUND_DOWN
+        )
         // Use maxDigits + 1 to account for decimal point
         .toString()
         .substr(0, this.maxDigits + 1)
@@ -135,7 +141,7 @@ export default Vue.extend({
 
     /** Show full balance on hover in case it's truncated */
     balanceTooltip(): string {
-      return `${this.uplink.balance$.value} ${this.uplink.unit().symbol}`
+      return `${this.uplink.balance$.value} ${this.uplink.unit.symbol}`
     }
   },
   methods: {
@@ -283,7 +289,7 @@ export default Vue.extend({
 
     &__stripe {
       height: 40px;
-      background: #dfdfdf;
+      background: #d3d3d3;
     }
 
     &__actions {
@@ -333,13 +339,17 @@ export default Vue.extend({
     }
   }
 
-  $xrp-accent: #23292f;
+  $dark-card-stripe: dimgray;
+  $xrp-background: #23292f;
+  $dai-background: rgb(15, 15, 15);
+  $dai-background: rgb(18, 18, 18);
+
   &--xrp {
     #{ $self } {
       &__front {
-        background-color: $xrp-accent;
+        background-color: $xrp-background;
         background-image: url('~@/assets/xrp-logo.svg');
-        background-position: left -54px center;
+        background-position: left -48px center;
         background-size: auto 210px;
 
         &__balance {
@@ -352,10 +362,37 @@ export default Vue.extend({
       }
 
       &__back {
-        background-color: $xrp-accent;
+        background-color: $xrp-background;
 
         &__stripe {
-          background: black;
+          background: $dark-card-stripe;
+        }
+      }
+    }
+  }
+
+  &--dai {
+    #{ $self } {
+      &__front {
+        background-color: $dai-background;
+        background-image: url('~@/assets/dai-logo.svg');
+        background-position: left -120px top -60px;
+        background-size: auto 380px;
+
+        &__balance {
+          // Needs additional specificity to override previous style
+          &__amount,
+          &__asset-code {
+            color: white;
+          }
+        }
+      }
+
+      &__back {
+        background-color: $dai-background;
+
+        &__stripe {
+          background: $dark-card-stripe;
         }
       }
     }
