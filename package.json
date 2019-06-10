@@ -41,7 +41,7 @@
   "homepage": "https://github.com/Kava-Labs/switch#readme",
   "dependencies": {
     "@kava-labs/crypto-rate-utils": "^4.0.1",
-    "@kava-labs/switch-api": "file:../ilp-sdk/kava-labs-switch-api-0.6.2.tgz",
+    "@kava-labs/switch-api": "^0.7.0",
     "bignumber.js": "^7.2.1",
     "debug": "^4.1.1",
     "electron-better-ipc": "^0.3.0",
@@ -62,6 +62,7 @@
     "@vue/eslint-config-typescript": "^4.0.0",
     "electron": "^5.0.2",
     "electron-icon-builder": "^1.0.0",
+    "electron-notarize": "^0.1.1",
     "envkey": "^1.2.6",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.2.2",

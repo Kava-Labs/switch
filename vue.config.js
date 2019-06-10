@@ -15,14 +15,21 @@ module.exports = {
         win: {
           target: 'nsis'
         },
-        mac: {
-          category: 'public.app-category.finance'
-        },
         linux: {
           category: 'Finance',
           packageCategory: 'wallet',
           target: 'AppImage'
         },
+        mac: {
+          category: 'public.app-category.finance',
+          /**
+           * To enable notarizing the app, followed the configuration outlined by this tutorial:
+           * https://kilianvalkhof.com/2019/electron/notarizing-your-electron-application/
+           */
+          hardenedRuntime: true,
+          gatekeeperAssess: false
+        },
+        afterSign: 'scripts/notarize.js',
         // Include ths OS so it's clearer which to download
         artifactName: '${productName}-${os}-v${version}.${ext}'
       },
