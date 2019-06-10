@@ -376,8 +376,8 @@ export default Vue.extend({
       &__front {
         background-color: $dai-background;
         background-image: url('~@/assets/dai-logo.svg');
-        background-position: left -120px top -60px;
-        background-size: auto 380px;
+        background-position: left -80px top -20px;
+        background-size: auto 300px;
 
         &__balance {
           // Needs additional specificity to override previous style

@@ -101,7 +101,7 @@ export default {
 
       &--dai {
         background-image: url('~@/assets/dai-logo.svg');
-        background-size: 100px;
+        background-size: 78px;
       }
 
       @at-root #{$button}:hover:not(#{$button}--disabled) & {
