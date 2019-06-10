@@ -23,10 +23,7 @@
         />
         <label class="select-asset__button__label">XRP</label>
       </div>
-      <div
-        class="select-asset__button select-asset__button--disabled"
-        title="Coming soon!"
-      >
+      <div class="select-asset__button" @click="$store.dispatch('selectDai')">
         <div
           class="select-asset__button__icon select-asset__button__icon--dai"
         />
@@ -104,7 +101,7 @@ export default {
 
       &--dai {
         background-image: url('~@/assets/dai-logo.svg');
-        background-size: 55px;
+        background-size: 100px;
       }
 
       @at-root #{$button}:hover:not(#{$button}--disabled) & {

@@ -163,6 +163,7 @@ $mdc-theme-primary: white;
     background: $primary;
     color: white;
     position: fixed;
+    z-index: 20;
     top: 0;
     transform: translateZ(0);
 

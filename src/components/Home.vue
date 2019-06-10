@@ -5,7 +5,7 @@
         <uplink-card
           :uplink="uplink"
           :display="uplinksDisplay[uplink.id]"
-          @select="selectUplink"
+          @select="id => $store.dispatch('selectUplinkToSwap', id)"
         />
       </div>
       <div v-if="!selectedSourceUplink" key="add-uplink" class="card">
@@ -57,23 +57,6 @@ export default Vue.extend({
         }),
         {}
       )
-    }
-  },
-  methods: {
-    // TODO Move this to Vuex store?
-    selectUplink(id: string) {
-      if (!this.selectedSourceUplink) {
-        this.$store.commit('NAVIGATE_TO', {
-          type: 'select-dest-uplink',
-          selectedSourceUplink: id
-        })
-      } else {
-        this.$store.commit('NAVIGATE_TO', {
-          type: 'swap',
-          sourceUplink: this.selectedSourceUplink,
-          destinationUplink: id
-        })
-      }
     }
   }
 })

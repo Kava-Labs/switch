@@ -39,16 +39,17 @@
     </div>
     <AmountInput
       :focused="true"
-      :asset-code="sourceUnit().symbol"
-      :amount="sourceAmount && sourceAmount.toString()"
+      :asset-code="sourceUnit.symbol"
+      :amount="sourceAmount"
       :amount-usd="sourceAmountUsd"
       class="swap__source-input"
       label="Send amount"
       @input="handleSourceAmountInput"
     />
     <AmountInput
-      :asset-code="destinationUnit().symbol"
-      :amount="destAmount && destAmount.toString()"
+      :asset-code="destinationUnit.symbol"
+      :amount="destAmount"
+      :amount-usd="destinationAmountUsd"
       class="swap__destination-input"
       label="Receive amount"
       @input="handleDestAmountInput"
@@ -82,13 +83,28 @@
 import UplinkCard from '@/components/card/UplinkCard.vue'
 import AmountInput from './AmountInput.vue'
 import BigNumber from 'bignumber.js'
-import { convert, usd } from '@kava-labs/crypto-rate-utils'
+import {
+  convert,
+  exchangeUnit,
+  exchangeQuantity,
+  getRate
+} from '@kava-labs/crypto-rate-utils'
 import { Uplink } from '@/store'
 import Vue from 'vue'
 import { from } from 'rxjs'
 import { pairwise, filter, takeUntil } from 'rxjs/operators'
 
-const MAX_TRADE_SIZE = usd(20)
+const getAssetScale = uplink =>
+  Math.abs(uplink.unit.exchangeScale - uplink.unit.accountScale)
+
+const usd = exchangeUnit({
+  symbol: 'USD',
+  exchangeScale: 2,
+  accountScale: 2,
+  scale: 2
+})
+
+const MAX_TRADE_SIZE = exchangeQuantity(usd, 20)
 const MAX_SLIPPAGE = 0.99
 
 export default {
@@ -101,11 +117,11 @@ export default {
   },
   data() {
     return {
-      sourceAmount: null,
-      destAmount: null,
-      /** Active dots animating settlements (only 3 at a time) */
-      activeMoneyOut: [false, false, false],
-      activeMoneyIn: [false, false, false]
+      sourceAmount: '',
+      destAmount: '',
+      /** Active dots animating settlements (4 at a time) */
+      activeMoneyOut: [false, false, false, false],
+      activeMoneyIn: [false, false, false, false]
     }
   },
   computed: {
@@ -133,19 +149,31 @@ export default {
       return showUsdAmount
         ? '$' +
             convert(
-              this.sourceUnit(this.sourceAmount),
-              usd(),
+              exchangeQuantity(this.sourceUnit, this.sourceAmount),
+              usd,
               this.$store.state.rateApi
-            ).toFixed(2, BigNumber.ROUND_CEIL)
+            ).amount.toFixed(2, BigNumber.ROUND_CEIL)
         : null
     },
-    // TODO Replace with availableToSend
-    sourceOutgoingCapacity() {
-      return this.sourceUplink.outgoingCapacity$.value
+    destinationAmountUsd() {
+      // e.g. if sourceAmount=".", prevent $NaN
+      const showUsdAmount =
+        this.destAmount && !new BigNumber(this.destAmount).isNaN()
+
+      return showUsdAmount
+        ? '$' +
+            convert(
+              exchangeQuantity(this.destinationUnit, this.destAmount),
+              usd,
+              this.$store.state.rateApi
+            ).amount.toFixed(2, BigNumber.ROUND_DOWN)
+        : null
     },
-    // TODO Replace with availableToReceive
+    sourceOutgoingCapacity() {
+      return this.sourceUplink.availableToSend$.value
+    },
     destinationIncomingCapacity() {
-      return this.destinationUplink.incomingCapacity$.value
+      return this.destinationUplink.availableToReceive$.value
     }
   },
   // When capacity changes, update the amount of available capacity
@@ -266,8 +294,8 @@ export default {
 
       // Allow the fields to be cleared
       if (!input || input.length === 0) {
-        this.sourceAmount = null
-        this.destAmount = null
+        this.sourceAmount = ''
+        this.destAmount = ''
         return
       }
 
@@ -279,9 +307,9 @@ export default {
       }
 
       let sourceAmount = parsedInput
-      const exchangeRate = convert(
-        this.sourceUnit(),
-        this.destinationUnit(),
+      const exchangeRate = getRate(
+        this.sourceUnit,
+        this.destinationUnit,
         this.$store.state.rateApi
       )
 
@@ -289,11 +317,7 @@ export default {
       let showIncomingCapacityToast = false
       let showOutgoingCapacityToast = false
 
-      let destAmount = convert(
-        this.sourceUnit(sourceAmount),
-        this.destinationUnit(),
-        exchangeRate
-      )
+      let destAmount = sourceAmount.times(exchangeRate)
       const reverseExchangeRate = new BigNumber(1).dividedBy(exchangeRate)
 
       // Calculate the max destination amount and reduce all values
@@ -304,31 +328,29 @@ export default {
         showIncomingCapacityToast = true
 
         destAmount = maxDestAmount
-        sourceAmount = convert(
-          this.destinationUnit(destAmount),
-          this.sourceUnit(),
-          reverseExchangeRate
-        )
+        sourceAmount = exchangeQuantity(
+          this.destinationUnit,
+          destAmount
+        ).amount.times(reverseExchangeRate)
       }
 
       // Calculate max source amount and reduce all values
       const outgoingCapacity = this.sourceUplink.outgoingCapacity$.value
       const tradeLimit = convert(
         MAX_TRADE_SIZE,
-        this.sourceUnit(),
+        this.sourceUnit,
         this.$store.state.rateApi
-      )
+      ).amount
       const maxSourceAmount = BigNumber.min(outgoingCapacity, tradeLimit)
       if (sourceAmount.isGreaterThan(maxSourceAmount)) {
         showOutgoingCapacityToast = sourceAmount.isGreaterThan(outgoingCapacity)
         showTradeLimitToast = sourceAmount.isGreaterThan(tradeLimit)
 
         sourceAmount = maxSourceAmount
-        destAmount = convert(
-          this.sourceUnit(sourceAmount),
-          this.destinationUnit(),
-          exchangeRate
-        )
+        destAmount = exchangeQuantity(
+          this.sourceUnit,
+          sourceAmount
+        ).amount.times(exchangeRate)
       }
 
       // Show relevant toasts
@@ -352,11 +374,11 @@ export default {
       // Truncate the amounts
       // (Must be done last so have full precision to convert between them)
       sourceAmount = sourceAmount.decimalPlaces(
-        this.sourceUplink.assetScale,
+        getAssetScale(this.sourceUplink),
         BigNumber.ROUND_DOWN
       )
       destAmount = destAmount.decimalPlaces(
-        this.destinationUplink.assetScale,
+        getAssetScale(this.destinationUplink),
         BigNumber.ROUND_DOWN
       )
 
@@ -378,8 +400,8 @@ export default {
 
       // Allow the fields to be cleared
       if (!input || input.length === 0) {
-        this.sourceAmount = null
-        this.destAmount = null
+        this.sourceAmount = ''
+        this.destAmount = ''
         return
       }
 
@@ -390,19 +412,18 @@ export default {
         return
       }
 
-      const exchangeRate = convert(
-        this.sourceUnit(),
-        this.destinationUnit(),
+      const exchangeRate = getRate(
+        this.sourceUnit,
+        this.destinationUnit,
         this.$store.state.rateApi
       )
       const reverseExchangeRate = new BigNumber(1).dividedBy(exchangeRate)
 
       let destAmount = parsedInput
-      let sourceAmount = convert(
-        this.destinationUnit(destAmount),
-        this.sourceUnit(),
-        reverseExchangeRate
-      )
+      let sourceAmount = exchangeQuantity(
+        this.destinationUnit,
+        destAmount
+      ).amount.times(reverseExchangeRate)
 
       let showTradeLimitToast = false
       let showIncomingCapacityToast = false
@@ -416,20 +437,19 @@ export default {
         showIncomingCapacityToast = true
 
         destAmount = maxDestAmount
-        sourceAmount = convert(
-          this.destinationUnit(destAmount),
-          this.sourceUnit(),
-          reverseExchangeRate
-        )
+        sourceAmount = exchangeQuantity(
+          this.destinationUnit,
+          destAmount
+        ).amount.times(reverseExchangeRate)
       }
 
       // Calculate max source amount and reduce all values
       const outgoingCapacity = this.sourceUplink.outgoingCapacity$.value
       const tradeLimit = convert(
         MAX_TRADE_SIZE,
-        this.sourceUnit(),
+        this.sourceUnit,
         this.$store.state.rateApi
-      )
+      ).amount
       const maxSourceAmount = BigNumber.min(
         outgoingCapacity,
         tradeLimit,
@@ -440,11 +460,10 @@ export default {
         showTradeLimitToast = sourceAmount.isGreaterThan(tradeLimit)
 
         sourceAmount = maxSourceAmount
-        destAmount = convert(
-          this.sourceUnit(sourceAmount),
-          this.destinationUnit(),
-          exchangeRate
-        )
+        destAmount = exchangeQuantity(
+          this.sourceUnit,
+          sourceAmount
+        ).amount.times(exchangeRate)
       }
 
       // Show relevant toasts
@@ -464,11 +483,11 @@ export default {
       // Truncate the amounts
       // (Must be done last so have full precision to convert between them)
       sourceAmount = sourceAmount.decimalPlaces(
-        this.sourceUplink.assetScale,
+        getAssetScale(this.sourceUplink),
         BigNumber.ROUND_DOWN
       )
       destAmount = destAmount.decimalPlaces(
-        this.destinationUplink.assetScale,
+        getAssetScale(this.destinationUplink),
         BigNumber.ROUND_DOWN
       )
 
