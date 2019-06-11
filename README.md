@@ -3,7 +3,7 @@
 </p>
 <h3 align="center">💸&ensp;Swap BTC, ETH, DAI and XRP in seconds. Keep your private keys private. 🔒</h3>
 
-![Switch swap screen cropped](./screenshots/swap-eth-btc-cropped.png)
+![Switch swap screen cropped](./docs/screenshots/swap-eth-btc-cropped.png)
 
 <div align="center">
 
@@ -23,13 +23,13 @@ Load funds onto "cards," swap between them, and withdraw at your leisure. Only y
 
 ### 1. Download Switch
 
-#### &raquo; [Mac](https://github.com/Kava-Labs/switch/releases/download/v0.2.1/Switch-mac-v0.2.1.dmg) | [Windows](https://github.com/Kava-Labs/switch/releases/download/v0.2.1/Switch-win-v0.2.1.exe) | [Linux](https://github.com/Kava-Labs/switch/releases/download/v0.2.1/Switch-linux-v0.2.1.AppImage) &laquo;
+#### &raquo; [Mac](https://github.com/Kava-Labs/switch/releases/download/v0.2.2/Switch-mac-v0.2.2.dmg) | [Windows](https://github.com/Kava-Labs/switch/releases/download/v0.2.2/Switch-win-v0.2.2.exe) | [Linux](https://github.com/Kava-Labs/switch/releases/download/v0.2.2/Switch-linux-v0.2.2.AppImage) &laquo;
 
 Switch will prompt you whether you want to use testnet mode or mainnet mode. To get started, we suggest selecting testnet (you can always switch to mainnet mode later).
 
 ### 2. Add cards
 
-Add and deposit to a minimum of two cards to enable swapping. To get started, we recommend ETH and XRP:
+Add and deposit to a minimum of two cards to enable swapping. To get started on testnet, ETH, DAI or XRP are the simplest.
 
 - **ETH**, **DAI**: Add an Ethereum card using a private key. You can generate a private key and address [here](https://vanity-eth.tk). Then, load the address with testnet ether from [the Kovan testnet faucet](https://faucet.kovan.network/).
 - **XRP**: Add an XRP card using a XRP secret. If you don't have a testnet account, generate a prefunded account and secret from [the XRP testnet faucet](https://developers.ripple.com/xrp-test-net-faucet.html).
@@ -41,7 +41,7 @@ Switch will prompt you to securely deposit funds onto your cards as you add them
 
 Select a card to send, then click "Swap" and choose a card to receive. Enter the desired amount, and exchange crypto in seconds!
 
-![Demo of XRP to ETH swap](./screenshots/swap-xrp-eth.gif)
+![Demo of XRP to ETH swap](./docs/screenshots/swap-xrp-eth.gif)
 
 ## How It Works
 
