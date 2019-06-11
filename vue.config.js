@@ -1,5 +1,7 @@
 const path = require('path')
 const webpack = require('webpack')
+const { notarize } = require('electron-notarize')
+require('dotenv').config()
 
 module.exports = {
   pluginOptions: {
@@ -27,10 +29,24 @@ module.exports = {
            * https://kilianvalkhof.com/2019/electron/notarizing-your-electron-application/
            */
           hardenedRuntime: true,
-          gatekeeperAssess: false
+          gatekeeperAssess: false,
+          entitlements: 'public/entitlements.mac.plist',
+          entitlementsInherit: 'public/entitlements.mac.plist'
         },
-        afterSign: 'scripts/notarize.js',
-        // Include ths OS so it's clearer which to download
+        afterSign: async context => {
+          const { electronPlatformName, appOutDir } = context
+          const appName = context.packager.appInfo.productFilename
+
+          if (electronPlatformName === 'darwin') {
+            return notarize({
+              appBundleId: 'io.kava.switch',
+              appPath: `${appOutDir}/${appName}.app`,
+              appleId: process.env.APPLE_ID,
+              appleIdPassword: process.env.APPLE_PASSWORD
+            })
+          }
+        },
+        // Include ths OS so it's clearer which to download from the filename
         artifactName: '${productName}-${os}-v${version}.${ext}'
       },
       chainWebpackRendererProcess: config => {
